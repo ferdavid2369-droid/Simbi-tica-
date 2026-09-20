@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>El Surco y la Polis — Ensayo Liminal</title>
+  <style>
+    :root {
+      --crt-flicker: rgba(18, 16, 16, 0.1);
+      --phosphor-color: #e0d8b0;
+      --bg-color: #0b0c10;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body, html {
+      width: 100%;
+      height: 100%;
+      background-color: var(--bg-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      font-family: "Courier New", Courier, monospace;
+      color: var(--phosphor-color);
+    }
+    #viewport-container {
+      position: relative;
+      width: 960px;
+      height: 640px;
+      background: #000;
+      box-shadow: 0 0 50px rgba(0,0,0,0.9), 0 0 10px rgba(255, 230, 180, 0.05);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+    .crt-overlay {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%), 
+                  linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+      background-size: 100% 4px, 6px 100%;
+      pointer-events: none;
+      box-shadow: inset 0 0 60px rgba(0,0,0,0.85);
+    }
+    #ui-layer {
+      position: absolute;
+      bottom: 24px;
+      left: 5%;
+      width: 90%;
+      min-height: 180px;
+      background: rgba(12, 14, 18, 0.88);
+      border: 2px solid #5a5343;
+      box-shadow: 0 0 0 1px #1d1b18, inset 0 0 12px rgba(0,0,0,0.9);
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      backdrop-filter: blur(2px);
+    }
+    #speaker-tag {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #bfa15f;
+      margin-bottom: 8px;
+    }
+    #dialogue-text {
+      font-size: 15px;
+      line-height: 1.5;
+      color: #ede6d6;
+      min-height: 70px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    }
+    #options-container {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    .choice-btn {
+      background: #1f2329;
+      border: 1px solid #484f59;
+      color: #cfc7b4;
+      padding: 6px 14px;
+      font-family: inherit;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .choice-btn:hover {
+      background: #39424e;
+      color: #fff;
+      border-color: #bfa15f;
+    }
+    #init-overlay {
+      position: absolute;
+      inset: 0;
+      background: #0b0c10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      cursor: pointer;
+      text-align: center;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="viewport-container">
+    <canvas id="gameCanvas" width="480" height="320"></canvas>
+    <div class="crt-overlay"></div>
+    
+    <div id="ui-layer">
+      <div>
+        <div id="speaker-tag">Aurelio — Arador de Lindes</div>
+        <div id="dialogue-text"></div>
+      </div>
+      <div id="options-container"></div>
+    </div>
+
+    <div id="init-overlay">
+      <h2 style="letter-spacing: 4px; margin-bottom: 12px; color: #bfa15f;">EL SURCO Y LA POLIS</h2>
+      <p style="font-size: 13px; max-width: 450px; line-height: 1.6; color: #8c8577;">
+        "Ninguna espiga madura para sí misma, ni el grano se basta en soledad."<br><br>
+        Haz clic para calibrar la frecuencia de la memoria.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    /* -----------------------------------------------------------
+       MOTOR DE AUDIO PROCEDURAL RETRO/LIMINAL (SÍNTESIS AMBIENTAL)
+    ----------------------------------------------------------- */
+    class RetroSoundscape {
+      constructor() {
+        this.ctx = null;
+        this.started = false;
+      }
+      init() {
+        this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        this.started = true;
+        this.playWindDrone();
+        this.startBells();
+      }
+      playWindDrone() {
+        const bufferSize = this.ctx.sampleRate * 2;
+        const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const output = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          output[i] = Math.random() * 2 - 1;
+        }
+        const whiteNoise = this.ctx.createBufferSource();
+        whiteNoise.buffer = noiseBuffer;
+        whiteNoise.loop = true;
+
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(220, this.ctx.currentTime);
+
+        const gainNode = this.ctx.createGain();
+        gainNode.gain.setValueAtTime(0.04, this.ctx.currentTime);
+
+        whiteNoise.connect(filter);
+        filter.connect(gainNode);
+        gainNode.connect(this.ctx.destination);
+        whiteNoise.start();
+
+        // Modulación lenta de corte para sensación de intemperie y vigilia
+        setInterval(() => {
+          if (!this.ctx) return;
+          const targetFreq = 160 + Math.random() * 120;
+          filter.frequency.exponentialRampToValueAtTime(targetFreq, this.ctx.currentTime + 4);
+        }, 5000);
+      }
+      triggerTextChime() {
+        if (!this.started) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(440 + Math.random() * 40, this.ctx.currentTime);
+        gain.gain.setValueAtTime(0.015, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.08);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.08);
+      }
+      startBells() {
+        const scale = [196.00, 220.00, 261.63, 293.66, 329.63, 392.00]; // Sol mayor pentatónica (nostalgia campestre)
+        setInterval(() => {
+          if (!this.started || Math.random() > 0.45) return;
+          const note = scale[Math.floor(Math.random() * scale.length)];
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(note, this.ctx.currentTime);
+          gain.gain.setValueAtTime(0.03, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 4.5);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + 4.5);
+        }, 4000);
+      }
+    }
+
+    /* -----------------------------------------------------------
+       DIÁLOGOS: LA ONTOLOGÍA DE LA COMUNIDAD ORGANIZADA Y EL SER
+    ----------------------------------------------------------- */
+    const philosophicalNarrative = {
+      start: {
+        text: "Miras mis manos y ves tierra quebrada, forastero. Crees que este campo empieza donde piso y termina en la empalizada. Te equivocas. El surco que abro a solas no cobra verdad hasta que el grano llega a la feria del pueblo.",
+        choices: [
+          { text: "¿Por qué insistir en el mercado si buscas sosiego?", target: "mercado" },
+          { text: "¿Acaso el hombre solitario no se basta ontológicamente a sí mismo?", target: "solipsismo" }
+        ]
+      },
+      mercado: {
+        text: "El mercado, antes de ser cálculo de ganancias mezquinas, es ágora y comunión de necesidades. Yo no siembro papas para acumular cifras muertas: siembro porque la maestra necesita comer para educar, y el zapatero para resguardar el andar de todos. Si me aíslo, me torno una cáscara infértil.",
+        choices: [
+          { text: "¿Hablas de la realización en el nosotros colectivo?", target: "comunidad" },
+          { text: "Suena a un sacrificio de tu propia autonomía individual.", target: "autonomia" }
+        ]
+      },
+      solipsismo: {
+        text: "El hombre que se cree isla no es un soberano: es una mutilación del ser. Nuestra ontología no se agota en la piel física; habitamos en el entrelazamiento de los afectos y el trabajo. Existir no es subsistir en un vacío, sino ser causa en el destino del prójimo.",
+        choices: [
+          { text: "¿Cómo se equilibra ese nosotros con el valor de la persona?", target: "comunidad" },
+          { text: "¿Es esto un recuerdo o estamos soñando despiertos?", target: "liminal" }
+        ]
+      },
+      autonomia: {
+        text: "La libertad sin destino común no es libertad: es anarquía del egoísmo, un extravío donde el fuerte aplasta al débil bajo el lema del triunfo privado. La verdadera dignidad nace cuando el alma individual aporta su vigor particular a una armonía superior. El fruto es dulce porque sacia bocas lejanas.",
+        choices: [
+          { text: "Es la doctrina de una comunidad plenamente organizada.", target: "comunidad" },
+          { text: "Dime más sobre los afectos que cohesionan la labor.", target: "afectos" }
+        ]
+      },
+      comunidad: {
+        text: "Una comunidad no se impone por decreto mecánico ni se disuelve en masa uniforme: se engendra desde abajo, en el despertar moral de cada vecino que comprende su función en el tejido vivo. El Estado no es un fin en sí; es el guardián de una justicia donde nadie sobre ni nadie quede rezagado.",
+        choices: [
+          { text: "¿Y cuál es el fin último de esa justicia?", target: "felicidad" },
+          { text: "El crepúsculo no se mueve... parece que el tiempo se detuvo.", target: "liminal" }
+        ]
+      },
+      afectos: {
+        text: "El pan amasado sin afecto sabe a ceniza fría. El trabajo adquiere sustancia estética y ética cuando deviene en ofrenda transindividual. Si mañana no despierto, mi paso no se medirá por lo retenido en los graneros, sino por la calidez con que sostuve la fragilidad de mi gente.",
+        choices: [
+          { text: "¿Hablas de felicidad comunitaria?", target: "felicidad" },
+          { text: "¿Quién eres en realidad, anciano?", target: "ontologia_sueño" }
+        ]
+      },
+      felicidad: {
+        text: "La felicidad no es un paraíso abstracto de deleites sensoriales ni un mandato estatal: es la alegría de sentirse artífice digno dentro de un orden justo. Es saber que tu fatiga en la tierra asegura el reposo y la esperanza de los hijos del pueblo.",
+        choices: [
+          { text: "Siento que esta granja habita entre mi pasado y mi porvenir.", target: "liminal" },
+          { text: "Debo volver a la marcha, viejo maestro.", target: "despedida" }
+        ]
+      },
+      liminal: {
+        text: "Observa los píxeles que trazan mi rostro y la luz ámbar de estas colinas. ¿Vienes del porvenir a interrogar a tus abuelos, o soy yo quien sueña en su lecho de muerte a un viajero digital? Lo real no reside en la consistencia de la materia, sino en la resonancia ética de lo que nos estamos diciendo.",
+        choices: [
+          { text: "¿Es esto una simulación o un recuerdo incorruptible?", target: "ontologia_sueño" },
+          { text: "Sea lo que sea, la verdad de tus palabras permanece.", target: "comunidad" }
+        ]
+      },
+      ontologia_sueño: {
+        text: "Todo artefacto y toda memoria son umbrales. El ayer, el presente y lo venidero respiran juntos en este instante suspendido. Lo tangible se gasta; la convicción de que el ser humano solo se plenifica en comunión trasciende cualquier código o vigilia.",
+        choices: [
+          { text: "Comprendo el sentido de la siembra.", target: "despedida" }
+        ]
+      },
+      despedida: {
+        text: "Vuelve a tu ciudad, forastero. Vuelve a tus redes y a tus plazas. Recuerda que ninguna técnica redime si olvida el rostro del desposeído, y que el único orden verdadero es el que une la dignidad libre con el corazón del pueblo. Cierra los ojos cuando gustes; yo seguiré arando en tu memoria.",
+        choices: [
+          { text: "Reiniciar el diálogo y contemplar el horizonte.", target: "start" }
+        ]
+      }
+    };
+
+    /* -----------------------------------------------------------
+       RENDERIZADO RETRO / PIXEL ART PROCEDURAL
+    ----------------------------------------------------------- */
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    let frame = 0;
+
+    function renderScene() {
+      frame++;
+      
+      // Cielo crepuscular onírico en gradiente retro
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, 180);
+      skyGrad.addColorStop(0, '#1a102f');
+      skyGrad.addColorStop(0.5, '#4d243d');
+      skyGrad.addColorStop(0.8, '#8c3f41');
+      skyGrad.addColorStop(1, '#d87f48');
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, canvas.width, 180);
+
+      // Sol liminal difuso (fusión de pasado/futuro)
+      const sunY = 110 + Math.sin(frame * 0.005) * 4;
+      ctx.fillStyle = '#ffcf73';
+      ctx.beginPath();
+      ctx.arc(240, sunY, 32, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Colinas de fondo (capa distante y nostálgica)
+      ctx.fillStyle = '#2c182b';
+      ctx.beginPath();
+      ctx.moveTo(0, 180);
+      for (let x = 0; x <= canvas.width; x += 10) {
+        ctx.lineTo(x, 140 + Math.sin(x * 0.015) * 15);
+      }
+      ctx.lineTo(canvas.width, 180);
+      ctx.fill();
+
+      // Tierra cultivada (surcos en perspectiva)
+      ctx.fillStyle = '#1c1613';
+      ctx.fillRect(0, 180, canvas.width, 140);
+
+      ctx.strokeStyle = '#2b211a';
+      ctx.lineWidth = 2;
+      for (let i = -100; i < canvas.width + 100; i += 32) {
+        ctx.beginPath();
+        ctx.moveTo(i, 180);
+        ctx.lineTo(i * 1.6 - 140, canvas.height);
+        ctx.stroke();
+      }
+
+      // Espigas de trigo meciéndose en el horizonte
+      ctx.strokeStyle = '#996f3d';
+      ctx.lineWidth = 1;
+      for (let x = 20; x < canvas.width; x += 12) {
+        const sway = Math.sin(frame * 0.03 + x) * 4;
+        ctx.beginPath();
+        ctx.moveTo(x, 195);
+        ctx.lineTo(x + sway, 175);
+        ctx.stroke();
+      }
+
+      // Dibujo procedural del anciano granjero (estética pixelada arquetípica)
+      const ancianoX = 220;
+      const ancianoY = 150;
+      const breathe = Math.sin(frame * 0.04) * 1.5;
+
+      // Sombra
+      ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      ctx.beginPath();
+      ctx.ellipse(ancianoX + 16, ancianoY + 54, 22, 6, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Piernas y botas
+      ctx.fillStyle = '#1a1917';
+      ctx.fillRect(ancianoX + 8, ancianoY + 36, 6, 16);
+      ctx.fillRect(ancianoX + 18, ancianoY + 36, 6, 16);
+
+      // Torso / Ropa de labor
+      ctx.fillStyle = '#4a443b';
+      ctx.fillRect(ancianoX + 4, ancianoY + 16 + breathe, 24, 22);
+
+      // Barba y rostro gastado
+      ctx.fillStyle = '#c79c78';
+      ctx.fillRect(ancianoX + 10, ancianoY + 6 + breathe, 12, 11);
+      ctx.fillStyle = '#e3ded8'; // Barba blanca
+      ctx.fillRect(ancianoX + 9, ancianoY + 12 + breathe, 14, 10);
+
+      // Sombrero de paja
+      ctx.fillStyle = '#8f7645';
+      ctx.fillRect(ancianoX - 2, ancianoY + 2 + breathe, 36, 4);
+      ctx.fillRect(ancianoX + 6, ancianoY - 6 + breathe, 20, 8);
+
+      // Azadón / Herramienta comunitaria
+      ctx.strokeStyle = '#5a4632';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(ancianoX + 32, ancianoY - 4);
+      ctx.lineTo(ancianoX + 32, ancianoY + 52);
+      ctx.stroke();
+      ctx.fillStyle = '#7a7d82';
+      ctx.fillRect(ancianoX + 28, ancianoY - 8, 10, 4);
+
+      // Partículas flotantes de polvillo / esporas doradas (efecto sueño/vigilia)
+      ctx.fillStyle = 'rgba(255, 225, 160, 0.45)';
+      for (let p = 0; p < 18; p++) {
+        const px = (Math.sin(p * 99 + frame * 0.01) * 0.5 + 0.5) * canvas.width;
+        const py = (Math.cos(p * 33 + frame * 0.015) * 0.5 + 0.5) * canvas.height;
+        ctx.fillRect(px, py, 2, 2);
+      }
+
+      requestAnimationFrame(renderScene);
+    }
+
+    /* -----------------------------------------------------------
+       CONTROLADOR DE DIÁLOGOS Y TEXTO PROGRESIVO
+    ----------------------------------------------------------- */
+    const soundscape = new RetroSoundscape();
+    let currentNode = 'start';
+    let isTyping = false;
+    let typeTimer = null;
+
+    const dialogueTextElem = document.getElementById('dialogue-text');
+    const optionsContainer = document.getElementById('options-container');
+    const initOverlay = document.getElementById('init-overlay');
+
+    function renderDialogue(nodeKey) {
+      const node = philosophicalNarrative[nodeKey];
+      currentNode = nodeKey;
+      dialogueTextElem.innerHTML = "";
+      optionsContainer.innerHTML = "";
+
+      let charIndex = 0;
+      isTyping = true;
+      clearInterval(typeTimer);
+
+      typeTimer = setInterval(() => {
+        if (charIndex < node.text.length) {
+          dialogueTextElem.textContent += node.text[charIndex];
+          if (charIndex % 3 === 0) soundscape.triggerTextChime();
+          charIndex++;
+        } else {
+          clearInterval(typeTimer);
+          isTyping = false;
+          displayOptions(node.choices);
+        }
+      }, 26);
+    }
+
+    function displayOptions(choices) {
+      optionsContainer.innerHTML = "";
+      choices.forEach(choice => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.textContent = `▶ ${choice.text}`;
+        btn.onclick = () => {
+          if (isTyping) {
+            // Completar texto inmediatamente si el usuario cliquea antes
+            clearInterval(typeTimer);
+            dialogueTextElem.textContent = philosophicalNarrative[currentNode].text;
+            isTyping = false;
+            displayOptions(choices);
+          } else {
+            renderDialogue(choice.target);
+          }
+        };
+        optionsContainer.appendChild(btn);
+      });
+    }
+
+    initOverlay.addEventListener('click', () => {
+      soundscape.init();
+      initOverlay.style.opacity = '0';
+      setTimeout(() => initOverlay.style.display = 'none', 600);
+      renderScene();
+      renderDialogue('start');
+    });
+  </script>
+</body>
+</html>
