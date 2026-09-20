@@ -2,126 +2,144 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Simbiótica</title>
   <style>
     :root {
-      --crt-tint: rgba(255, 255, 240, 0.03);
-      --bg-dark: #070a0d;
-      --bubble-bg: rgba(25, 30, 38, 0.94);
-      --bubble-border: #968364;
-      --bubble-text: #f7f4ea;
-      --accent-gold: #f2c054;
-      --accent-blue: #4aa3df;
-      --accent-green: #8ec378;
+      --bg-space: #07090c;
+      --panel-wood: #191f26;
+      --border-earth: #7a6850;
+      --accent-sun: #f4c259;
+      --accent-water: #68b8e3;
+      --accent-leaf: #89be72;
+      --ink-warm: #faf5ea;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body, html {
       width: 100%;
       height: 100%;
-      background-color: var(--bg-dark);
+      background-color: var(--bg-space);
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
       font-family: "Courier New", Courier, monospace;
-      color: var(--bubble-text);
+      color: var(--ink-warm);
     }
+    /* CONTENEDOR RESPONSIVO: PANTALLA COMPLETA O VENTANA RETRO */
     #viewport-container {
       position: relative;
-      width: 980px;
-      height: 640px;
+      width: 100vw;
+      height: 100vh;
+      max-width: 1000px;
+      max-height: 720px;
       background: #000;
-      box-shadow: 0 0 70px rgba(0,0,0,0.95), 0 0 24px rgba(242, 192, 84, 0.15);
-      border-radius: 14px;
+      box-shadow: 0 0 50px rgba(0,0,0,0.95);
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    @media (min-width: 768px) {
+      #viewport-container {
+        flex-direction: row;
+        border: 2px solid #362e24;
+      }
+    }
+    /* ÁREA VISUAL: EL CIELO, EL MONTE Y NOEL SIEMPRE DESPEJADOS */
+    #canvas-wrapper {
+      position: relative;
+      flex: 1.1;
+      width: 100%;
+      height: 50%;
+      min-height: 240px;
+      background: #000;
       overflow: hidden;
     }
+    @media (min-width: 768px) {
+      #canvas-wrapper {
+        flex: 1.2;
+        height: 100%;
+      }
+    }
     canvas {
-      display: block;
       width: 100%;
       height: 100%;
+      display: block;
       image-rendering: pixelated;
       image-rendering: crisp-edges;
     }
     .crt-overlay {
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.22) 50%), 
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
                   linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
-      background-size: 100% 3px, 5px 100%;
+      background-size: 100% 3px, 4px 100%;
       pointer-events: none;
-      box-shadow: inset 0 0 80px rgba(0,0,0,0.8);
+      box-shadow: inset 0 0 40px rgba(0,0,0,0.85);
     }
-
-    /* SISTEMA DE VIÑETAS LATERALES QUE NO TAPAS EL ROSTRO NI EL MATE */
-    #speech-bubble-container {
-      position: absolute;
-      top: 24px;
-      left: 20px;
-      width: 440px;
-      background: var(--bubble-bg);
-      border: 2px solid var(--bubble-border);
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.8), inset 0 0 10px rgba(0,0,0,0.6);
-      padding: 16px 18px;
+    /* PANEL DE DIÁLOGOS Y ACCIONES (INFERIOR EN MÓVIL, LATERAL EN ESCRITORIO) */
+    #ui-panel {
+      flex: 0.9;
+      width: 100%;
+      height: 50%;
+      background: var(--panel-wood);
+      border-top: 2px solid var(--border-earth);
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      justify-content: space-between;
+      padding: 14px 16px;
+      overflow-y: auto;
       z-index: 10;
-      backdrop-filter: blur(3px);
     }
-    /* Rabillo de viñeta orientado hacia Noel */
-    #speech-bubble-container::after {
-      content: "";
-      position: absolute;
-      top: 70px;
-      right: -14px;
-      border-width: 8px 0 8px 14px;
-      border-style: solid;
-      border-color: transparent transparent transparent var(--bubble-border);
-      display: block;
-      width: 0;
+    @media (min-width: 768px) {
+      #ui-panel {
+        flex: 0.8;
+        height: 100%;
+        border-top: none;
+        border-left: 2px solid var(--border-earth);
+        padding: 20px;
+      }
     }
-    #bubble-header {
+    #ui-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid #473e33;
+      border-bottom: 1px solid #43392f;
       padding-bottom: 4px;
+      margin-bottom: 8px;
     }
     #speaker-tag {
-      font-size: 12px;
-      text-transform: uppercase;
+      font-size: 13px;
       letter-spacing: 2px;
-      color: var(--accent-gold);
+      color: var(--accent-sun);
       font-weight: bold;
+      text-transform: uppercase;
     }
-    #time-indicator {
+    #time-tag {
       font-size: 11px;
-      color: var(--accent-blue);
       letter-spacing: 1px;
+      color: var(--accent-water);
     }
-    #dialogue-text {
+    #dialogue-box {
       font-size: 13.5px;
       line-height: 1.5;
-      color: #faf7ee;
-      min-height: 85px;
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.9);
+      color: #f7f3e8;
+      min-height: 75px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
     }
-    #options-container {
+    #choices-box {
       display: flex;
       flex-direction: column;
       gap: 6px;
-      margin-top: 4px;
-      max-height: 220px;
-      overflow-y: auto;
+      margin-top: 10px;
     }
     .choice-btn {
-      background: #1e242c;
-      border: 1px solid #485465;
-      color: #ede6d6;
-      padding: 7px 10px;
-      border-radius: 6px;
+      background: #242c36;
+      border: 1px solid #4d5a6b;
+      color: #eae5d6;
+      padding: 8px 12px;
+      border-radius: 5px;
       font-family: inherit;
       font-size: 12px;
       cursor: pointer;
@@ -130,20 +148,42 @@
       transition: all 0.15s ease;
     }
     .choice-btn:hover {
-      background: #343f4d;
+      background: #394554;
       color: #fff;
-      border-color: var(--accent-gold);
-      transform: translateX(2px);
+      border-color: var(--accent-sun);
     }
     .action-btn {
-      border-color: var(--accent-green) !important;
-      color: #c9f5b5 !important;
+      border-color: var(--accent-leaf) !important;
+      color: #c7f2b6 !important;
+    }
+
+    /* SISTEMA DE CARTAS ARQUETÍPICAS */
+    #cards-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .tarot-card {
+      background: #14181f;
+      border: 1px solid var(--accent-sun);
+      padding: 6px 2px;
+      text-align: center;
+      font-size: 10px;
+      color: #f7e6b5;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.2s ease;
+    }
+    .tarot-card:hover {
+      background: #3f3627;
+      color: #fff;
     }
 
     #init-overlay {
       position: absolute;
       inset: 0;
-      background: #0d1114;
+      background: #0c0f12;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -151,62 +191,65 @@
       z-index: 50;
       cursor: pointer;
       text-align: center;
-      padding: 24px;
+      padding: 20px;
     }
   </style>
 </head>
 <body>
 
   <div id="viewport-container">
-    <canvas id="gameCanvas" width="480" height="320"></canvas>
-    <div class="crt-overlay"></div>
+    <div id="canvas-wrapper">
+      <canvas id="gameCanvas" width="480" height="320"></canvas>
+      <div class="crt-overlay"></div>
+    </div>
     
-    <div id="speech-bubble-container">
-      <div id="bubble-header">
-        <div id="speaker-tag">Noel</div>
-        <div id="time-indicator">Día soleado</div>
+    <div id="ui-panel">
+      <div>
+        <div id="ui-header">
+          <div id="speaker-tag">Noel</div>
+          <div id="time-tag">Sol de Mañana</div>
+        </div>
+        <div id="dialogue-box"></div>
       </div>
-      <div id="dialogue-text"></div>
-      <div id="options-container"></div>
+      <div id="choices-box"></div>
     </div>
 
     <div id="init-overlay">
-      <h1 style="letter-spacing: 5px; margin-bottom: 12px; color: #f2c054; font-size: 26px;">SIMBIÓTICA</h1>
-      <p style="font-size: 13px; max-width: 480px; line-height: 1.6; color: #aca596;">
-        "El mate se ceba con agua tibia y la vida se sostiene con las manos de todos."<br><br>
-        Toca para acercarte al fogón con Noel.
+      <h1 style="letter-spacing: 5px; margin-bottom: 10px; color: #f4c259; font-size: 24px;">SIMBIÓTICA</h1>
+      <p style="font-size: 13px; max-width: 440px; line-height: 1.5; color: #a9a394;">
+        "El mate entibia las manos y la huerta sueña con el cosmos."<br><br>
+        Toca para acercarte a la tranquera con Noel.
       </p>
     </div>
   </div>
 
   <script>
     /* -----------------------------------------------------------
-       PAISAJE SONORO PROCEDURAL: DÍA, NOCHE Y CAMPANAS ONÍRICAS
+       PAISAJE SONORO: DÍA, NOCHE, AGUA Y FRECUENCIAS ONÍRICAS
     ----------------------------------------------------------- */
     class SimbioticaAudio {
       constructor() {
         this.ctx = null;
         this.started = false;
         this.filter = null;
-        this.droneGain = null;
       }
       init() {
         this.ctx = new (window.AudioContext || window.webkitAudioContext)();
         this.started = true;
         this.playDrone();
-        this.startGenerativeMelody();
+        this.startBells();
       }
       playDrone() {
-        const freqs = [146.83, 220.00, 293.66, 369.99]; // Re mayor acústico y acogedor
         this.filter = this.ctx.createBiquadFilter();
         this.filter.type = 'lowpass';
-        this.filter.frequency.setValueAtTime(400, this.ctx.currentTime);
+        this.filter.frequency.setValueAtTime(450, this.ctx.currentTime);
 
-        this.droneGain = this.ctx.createGain();
-        this.droneGain.gain.setValueAtTime(0.008, this.ctx.currentTime);
-        this.filter.connect(this.droneGain);
-        this.droneGain.connect(this.ctx.destination);
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.009, this.ctx.currentTime);
+        this.filter.connect(gain);
+        gain.connect(this.ctx.destination);
 
+        const freqs = [146.83, 220.00, 293.66, 369.99]; // Re mayor cálido
         freqs.forEach(f => {
           const osc = this.ctx.createOscillator();
           osc.type = 'triangle';
@@ -215,33 +258,21 @@
           osc.start();
         });
       }
-      setNightTone(isNight) {
+      setTimeFrequency(progress) {
         if (!this.ctx || !this.filter) return;
-        const targetFreq = isNight ? 220 : 450;
-        this.filter.frequency.exponentialRampToValueAtTime(targetFreq, this.ctx.currentTime + 3);
+        // Transición de frecuencia: día abierto (450Hz) a noche profunda (180Hz)
+        const target = 450 - (progress * 270);
+        this.filter.frequency.exponentialRampToValueAtTime(Math.max(120, target), this.ctx.currentTime + 2);
       }
-      triggerTextBeep() {
-        if (!this.started) return;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(480 + Math.random() * 40, this.ctx.currentTime);
-        gain.gain.setValueAtTime(0.01, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.05);
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        osc.start();
-        osc.stop(this.ctx.currentTime + 0.05);
-      }
-      triggerMateSlurp() {
+      triggerMate() {
         if (!this.started) return;
         for (let i = 0; i < 3; i++) {
           setTimeout(() => {
             const osc = this.ctx.createOscillator();
             const gain = this.ctx.createGain();
             osc.type = 'triangle';
-            osc.frequency.setValueAtTime(700 - i * 80, this.ctx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(300, this.ctx.currentTime + 0.1);
+            osc.frequency.setValueAtTime(650 - i * 90, this.ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(280, this.ctx.currentTime + 0.1);
             gain.gain.setValueAtTime(0.015, this.ctx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.1);
             osc.connect(gain);
@@ -251,345 +282,416 @@
           }, i * 70);
         }
       }
-      triggerApparitionSound() {
+      triggerChime() {
         if (!this.started) return;
-        const chords = [523.25, 659.25, 783.99, 1046.50];
-        chords.forEach(c => {
-          const osc = this.ctx.createOscillator();
-          const gain = this.ctx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(c, this.ctx.currentTime);
-          gain.gain.setValueAtTime(0.02, this.ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 3.5);
-          osc.connect(gain);
-          gain.connect(this.ctx.destination);
-          osc.start();
-          osc.stop(this.ctx.currentTime + 3.5);
-        });
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(520 + Math.random() * 40, this.ctx.currentTime);
+        gain.gain.setValueAtTime(0.01, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.05);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.05);
       }
-      startGenerativeMelody() {
-        const notes = [293.66, 329.63, 369.99, 440.00, 493.88];
+      triggerUFO() {
+        if (!this.started) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(440, this.ctx.currentTime);
+        osc.frequency.linearRampToValueAtTime(880, this.ctx.currentTime + 1.5);
+        gain.gain.setValueAtTime(0.02, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 3);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 3);
+      }
+      startBells() {
+        const notes = [293.66, 329.63, 440.00, 587.33];
         setInterval(() => {
-          if (!this.started || Math.random() > 0.4) return;
+          if (!this.started || Math.random() > 0.45) return;
           const note = notes[Math.floor(Math.random() * notes.length)];
           const osc = this.ctx.createOscillator();
           const gain = this.ctx.createGain();
           osc.type = 'sine';
           osc.frequency.setValueAtTime(note, this.ctx.currentTime);
           gain.gain.setValueAtTime(0.02, this.ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 2.5);
+          gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 3.0);
           osc.connect(gain);
           gain.connect(this.ctx.destination);
           osc.start();
-          osc.stop(this.ctx.currentTime + 2.5);
-        }, 4000);
+          osc.stop(this.ctx.currentTime + 3.0);
+        }, 4200);
       }
     }
 
     /* -----------------------------------------------------------
-       LABERINTO DIALÓGICO: LO COTIDIANO, LA RED Y LO LIMINAL
+       BASE DE DATOS: 16 CARTAS ARQUETÍPICAS
     ----------------------------------------------------------- */
-    const dialogLabyrinth = {
+    const tarotCards = [
+      { id: "buho", name: "1. Búho", text: "La vigilia silenciosa en la espesura: la sabiduría no grita ni apura el alba; espera en la sombra a que las cosas se muestren tal como son." },
+      { id: "papanoel", name: "2. Papá Noel", text: "El fulgor de la belleza ¡cómo se desvanece! Pasa veloz, fugitiva, con la ligereza de la inconstantísima flor de primavera." },
+      { id: "gato", name: "3. Gato", text: "Cuando nuestra atención se reparte entre estímulos múltiples, podemos alcanzar un estado de semiinconsciencia similar al que anhelaban los surrealistas." },
+      { id: "angel", name: "4. Ángel", text: "La caricia invisible en la tormenta: quien abriga la orfandad de un semejante sostiene las junturas mismas del firmamento." },
+      { id: "caracol", name: "5. Caracol", text: "Y empezaron a armarse grandes olas debido al fuerte viento que soplaba." },
+      { id: "faraon", name: "6. Faraón", text: "Esa buena suerte puede afectar a generaciones, a estirpes, a pueblos enteros." },
+      { id: "perfume", name: "7. Frascos de perfume", text: "La memoria atrapada en cristal: una gota encierra la primavera muerta de un valle que ya nadie recuerda haber caminado." },
+      { id: "ojo", name: "8. Ojo", text: "Uno debe llegar muy sumisamente al entendimiento de que uno es un segmento muy insignificante del universo." },
+      { id: "saturno", name: "9. Saturno", text: "El tiempo devorador y el aro de piedras heladas: cada hora tiene su cerco, pero la lentitud es el precio sagrado de la permanencia." },
+      { id: "pulpo", name: "10. Pulpo", text: "La inteligencia dispersa en los tentáculos: pensar no sucede sólo en el cráneo, sino en la caricia y en el abrazo con el fondo del agua." },
+      { id: "venus", name: "11. Venus Atrapamoscas", text: "La ternura vegetal que aprende a ser trampa para no perecer: aun la inocencia de la clorofila reclama su ración de barro y carne." },
+      { id: "robot", name: "12. Robot", text: "El metal amasado con anhelo humano: un corazón de cobre y litio que aprendió a soñar porque alguien le cantó una copla junto al torno." },
+      { id: "amonite", name: "13. Amonite", text: "La espiral calcárea petrificada en la piedra: el mar antiguo sigue latiendo en el fósil que hoy sirve de traba para la puerta de la cocina." },
+      { id: "helado", name: "14. Helado", text: "Luego, la resurrección, visible símbolo de la vegetación que crece, muere y renace." },
+      { id: "labio", name: "15. Labio", text: "El umbral donde el silencio se hace alimento o beso: ninguna verdad cobra cuerpo hasta que encuentra otra boca que la reciba." },
+      { id: "estrella", name: "16. Estrella enjaulada", text: "La chispa cautiva en el farol: pretendemos atrapar el fuego eterno para alumbrar la vereda, sin ver que el sol ya nos cobija a todos gratis." }
+    ];
+
+    /* -----------------------------------------------------------
+       NARRATIVA Y LABERINTO (5 FINALES)
+    ----------------------------------------------------------- */
+    const story = {
       start: {
         speaker: "Noel",
-        text: "Tomá, agarrá el mate que recién lo ensillé con yerba buena. Mirá qué lindo sol tenemos sobre el tablón de las verduras. Estaba pensando en ponerme a regar los tomates o arrancar el fuego para amasar el pan de la tarde. ¿Por dónde empezamos la ronda?",
+        text: "Tomá, agarrá el mate que está tibio y lindo. Encontré en el cajón de la alacena un frasco con semillas de zapallo y una perla vieja de nácar que se le cayó a mi abuela. Qué misterio cómo conviven las cosas de comer con los recuerdos... Estaba por encender el fuego para el pan de la tarde. ¿Me acompañás en los quehaceres?",
         choices: [
-          { text: "Aceptar el mate y mirar los plantines que piden agua.", target: "quehacer_regar", isAction: true },
-          { text: "Ayudarlo a encender el horno de barro para el pan.", target: "quehacer_amasar", isAction: true },
-          { text: "Acomodar los cajones para llevar la verdura a la feria.", target: "quehacer_feria", isAction: true },
-          { text: "Preguntarle por qué madruga tanto si el campo no se va a escapar.", target: "filo_tiempo_calma" }
+          { text: "Cebar otro mate y mirar los tomates que piden agua fresca.", target: "quehacer_regar", isAction: true },
+          { text: "Ayudar a amasar el pan criollo para los vecinos.", target: "quehacer_amasar", isAction: true },
+          { text: "Acomodar las calabazas para el trueque de la feria.", target: "quehacer_feria", isAction: true },
+          { text: "¿Por qué guardás esa perla junto a las semillas, Noel?", target: "filo_perla_casa" }
         ]
       },
 
-      /* RAMA AMASADO Y COMUNIDAD */
-      quehacer_amasar: {
+      /* RAMA COTIDIANA: LA PERLA Y LA ALACENA */
+      filo_perla_casa: {
         speaker: "Noel",
         mate: true,
-        text: "El secreto del pan no está en la harina ni en la levadura, hijo. Está en la fuerza con que uno hunde los nudillos pensando en la mesa ajena. Si amaso apurado y con bronca, la miga sale apelmazada y agria. Amasar con cariño para los vecinos hace que la hogaza rinda el doble; cuando uno produce sabiendo que otro va a comer, el trabajo deja de ser una carga y se vuelve un abrazo.",
+        text: "Porque la perla nació del dolor de una ostra que supo abrigar una arenisca molesta con ternura hasta volverla joya; y la semilla de zapallo es una promesa de alimento que necesita pudrirse para ser planta. En la cocina todo habla de convivencia: la sal marina, el fuego de leña seca, el repasador remendado... Nada en una casa vive solo.",
         choices: [
-          { text: "¿Y si cada familia amasara únicamente lo suyo y se cerrara en su casa?", target: "filo_egoismo_soledad" },
-          { text: "Huele a leña buena... Todo esto requiere tiempo y paciencia.", target: "filo_tiempo_calma" },
-          { text: "¿No te cansa entregarte tanto a gente que a veces ni te agradece?", target: "filo_cuidado_ternura" }
+          { text: "Todo parece una madeja donde nadie sobra.", target: "filo_red_comunidad_1" },
+          { text: "A veces uno quisiera aislarse y no depender de nadie.", target: "filo_egoismo" },
+          { text: "Acerquémonos a regar el huerto.", target: "quehacer_regar", isAction: true }
         ]
       },
 
-      /* RAMA REGAR Y BOTÁNICA */
+      /* QUEHACER: REGAR (SENSIBILIDAD Y BOTÁNICA) */
       quehacer_regar: {
         speaker: "Noel",
         action: "regar",
-        text: "Fijate cómo la tierra reseca chupa el agua con un suspiro. Las plantas son sabias: el tomate no compite a los empujones con la albahaca; se cuidan juntos de las pestes bajo tierra en un entrevero de raíces. Si el tallo se encapricha en guardar toda el agua para sí solo, la tierra se seca alrededor y termina secándose él también. Vivir es convidar.",
+        text: "Mirá cómo agradecen las hojas de tomate el agua mansa. Hay gente que cree que las plantas son cosas mudas, pero si les prestás atención, ves cómo giran hacia la luz y cómo se avisan unas a otras con olores si viene una oruga. La sensibilidad está en la savia misma; no hace falta tener cerebro para sentir la sed y el alivio.",
         choices: [
-          { text: "Es impresionante cómo buscan la luz del sol sin que nadie se los mande.", target: "filo_sol_alquimia" },
-          { text: "¿A veces no sentís bronca cuando una plaga te arruina la siembra?", target: "filo_maldad_grieta" },
-          { text: "Pensar que un aleteo o una lluvia a destiempo puede cambiarlo todo...", target: "secreto_mariposa_1" }
+          { text: "Esa sensibilidad vegetal se parece mucho al cariño humano.", target: "filo_cuidado" },
+          { text: "Y pensar que todo eso depende del fuego del sol...", target: "filo_sol_alquimia" },
+          { text: "A veces pienso en el aleteo de una mariposa y me asusto...", target: "secreto_ufo_1" } // RUTA SECRETA EXTRATERRESTRE
         ]
       },
 
-      /* RAMA FERIA Y MERCADO */
+      /* QUEHACER: AMASAR (EL PAN Y LA COMUNIDAD) */
+      quehacer_amasar: {
+        speaker: "Noel",
+        mate: true,
+        text: "Hundí los dedos en la masa sin miedo. Cuando amaso para la escuela del pueblo, siento que mis manos se juntan con las del molinero que trituró el trigo y con las del muchacho que cortó la leña. Si amasara un pedazo de pan solo para mí, me atragantaría en la mesa. La comida sabe rica cuando sabés que va a saciar la panza del vecino.",
+        choices: [
+          { text: "Es la necesidad de que la comunidad marche junta y organizada.", target: "filo_red_comunidad_1" },
+          { text: "¿Y qué pasa cuando alguien decide cortar ese lazo por avaricia?", target: "filo_egoismo" },
+          { text: "¿Y si nosotros dos fuéramos apenas un recuerdo?", target: "pre_final_nieve" } // RUTA FINAL BOLA DE NIEVE
+        ]
+      },
+
+      /* QUEHACER: FERIA (EL MERCADO VULNERABLE) */
       quehacer_feria: {
         speaker: "Noel",
         mate: true,
-        text: "Carguemos estos zapallos plomo en la chata. En el pueblo necesito cambiar tres calabazas por la grasa del carnicero y la tijera que me afiló don Sosa. Si me quedara acá solo en la tapera comiendo zapallo todos los días, me volvería un bicho huraño. El mercado de la plaza es el lugar donde los oficios se encuentran y nadie sobra.",
+        text: "En la feria no vamos a pelearnos por monedas de cobre; vamos a mirarnos las caras. El mercado verdadero es frágil, como una flor de calabaza: si el zapatero se enferma, yo ando descalzo; si a mí se me apesta la quinta, la maestra no tiene ensalada para el almuerzo. Depender del otro no es una vergüenza; es la condición más hermosa de los mortales.",
         choices: [
-          { text: "Sin los demás, hasta las palabras perderían su sentido.", target: "filo_palabras_pueblo" },
-          { text: "¿Y qué pasa con los que van a la feria solo a especular y acaparar?", target: "filo_egoismo_soledad" },
-          { text: "Todo parece una telaraña gigante donde cada hilo sostiene al otro.", target: "filo_red_mecanica" }
+          { text: "Igual que las palabras: nadie inventa un idioma en soledad.", target: "filo_lenguaje" },
+          { text: "Eso me hace pensar en el planeta entero...", target: "pre_final_satelite" }, // RUTA FINAL SATÉLITE
+          { text: "¿Qué destino tienen las vidas de todos ellos?", target: "pre_final_cartas" } // RUTA FINAL CARTAS
         ]
       },
 
-      /* TIEMPO Y DESTINO */
-      filo_tiempo_calma: {
+      /* NODO DE DIÁLOGO: LENGUAJE */
+      filo_lenguaje: {
         speaker: "Noel",
         mate: true,
-        text: "Mirá el humo del pucho y el vapor de la pava... Se van despacito hacia el cielo y no vuelven. Uno no puede apurar el brote de una semilla tirándole de las hojas para que crezca más rápido; sólo conseguís arrancarla de raíz. El tiempo de la chacra enseña a esperar. Las cosas maduran cuando tienen que madurar, no cuando a uno se le antoja.",
+        text: "Si hubieses nacido solo en un monte tupido sin ver a un cristiano, en tu cabeza no habría ni un solo pensamiento con palabras. Cada nombre que decís —el mate, la pava, el sauce— es un préstamo amoroso de los que caminaron la tierra antes que vos. Hasta para rezar o quejarte a solas necesitás del pueblo que inventó tu voz.",
         choices: [
-          { text: "¿Y nosotros podemos elegir nuestro rumbo o la correntada nos lleva?", target: "filo_destino_rio" },
-          { text: "A veces me asusta ver cómo se pasa la vida y el cuerpo envejece.", target: "filo_cuerpo_humus" },
-          { text: "Cebar otro mate y disfrutar de la quietud.", target: "start" }
+          { text: "Somos el eco de una comunidad inmensa.", target: "filo_red_comunidad_1" },
+          { text: "Esa verdad me llena de paz. Mostrame el porvenir, Noel.", target: "pre_final_cartas" }
         ]
       },
 
-      /* EL RÍO DEL DESTINO */
-      filo_destino_rio: {
+      /* NODO: EL CUIDADO Y LA TERNURA */
+      filo_cuidado: {
         speaker: "Noel",
-        text: "El río tiene su lecho de piedras hondas, y a ese cauce lo manda la montaña; uno no inventa la gravedad ni la tormenta que viene del sur. Pero el timón del bote es tuyo, y si ves a un vecino ahogándose en la orilla, nadie te prohíbe arrimar la canoa y estirarle la mano. Ahí está la libertad: no en caprichos tontos, sino en remar juntos contra la creciente.",
+        text: "El mundo no se arregla a los rebencazos ni con discursos duros. La vida se sostiene con ternura chúcara: arrimarle tierra al tallito que dobló el viento, ponerle un poncho al abuelo que tirita, convidarle un amargo al que viene cabizbajo. Cuidar la fragilidad es el único heroísmo que no deja muertos detrás.",
         choices: [
-          { text: "Una mínima decisión a tiempo salva una vida entera.", target: "secreto_mariposa_1" },
-          { text: "Como cuidar a los plantines chicos frente a la helada.", target: "filo_cuidado_ternura" }
+          { text: "¿Y cómo cuidar cuando la muerte apaga a los que queremos?", target: "filo_muerte" },
+          { text: "El cielo se está poniendo azul oscuro...", target: "pre_final_nieve" }
         ]
       },
 
-      /* EL LENGUAJE */
-      filo_palabras_pueblo: {
-        speaker: "Noel",
-        mate: true,
-        text: "¿Sabés qué pensaba recién mientras miraba la pava? Que ni vos ni yo inventamos la palabra 'agua' ni la palabra 'mate'. Si te hubiesen criado los carpinchos en una isla desierta, no tendrías nombres en la cabeza ni podrías charlar conmigo ahora. Cada palabra que sale de tu boca es una herencia que te dejaron miles de abuelos que ya no están.",
-        choices: [
-          { text: "Pensar ya es estar en deuda y en compañía con los demás.", target: "filo_red_mecanica" },
-          { text: "¿Y si esta charla fuese apenas un sueño que se desvanece?", target: "filo_onirico_espejo" }
-        ]
-      },
-
-      /* EL SOL Y LA ALQUIMIA BOTÁNICA */
+      /* NODO: EL SOL Y LA ALQUIMIA */
       filo_sol_alquimia: {
         speaker: "Noel",
-        text: "Ese sol que nos calienta la nuca viene de lejísimos, cruzando un frío negro que ni imaginamos. Y las hojas verdes hacen la magia más linda del mundo: agarran ese rayito de luz, un sorbo de agua y el aire invisible, y te devuelven una manzana dulce, madera para el techo y aire limpio para respirar. No hay fábrica humana que iguale esa alquimia callada.",
+        text: "El sol es un horno a millones de leguas que regala su luz sin pedir factura a nadie. Y las tomateras son alquimistas calladas: beben ese rayo, respiran el aire del campo, toman un traguito de agua subterránea y te regalan un fruto colorado y dulce. La abundancia nace de la armonía con lo que nos rodea.",
         choices: [
-          { text: "¡Es un milagro que todo ese equilibrio funcione!", target: "secreto_mariposa_1" },
-          { text: "Y hoy usamos máquinas que imitan esa misma luz...", target: "filo_red_mecanica" }
+          { text: "Si el sol se apaga o la tierra se enferma, nada sobrevive.", target: "filo_red_comunidad_1" },
+          { text: "Siento un zumbido allá arriba en las estrellas...", target: "secreto_ufo_2" }
         ]
       },
 
-      /* CUIDADO Y TERNURA */
-      filo_cuidado_ternura: {
-        speaker: "Noel",
-        text: "A los plantines no se les grita para que den fruto, ni se les pone un tribunal de jueces para ver si merecen agua. Se los riega a la tardecita cuando el sol afloja, con cuidado de no quebrarles el tallito. La vida se sostiene con esa ternura chúcara: estar atento a la fragilidad del que no se puede defender.",
-        choices: [
-          { text: "La gente confunde esa ternura con debilidad.", target: "filo_egoismo_soledad" },
-          { text: "Hasta el propio cuerpo pide ese amparo con los años.", target: "filo_cuerpo_humus" }
-        ]
-      },
-
-      /* EGOÍSMO */
-      filo_egoismo_soledad: {
+      /* NODO: EGOÍSMO Y DAÑO */
+      filo_egoismo: {
         speaker: "Noel",
         mate: true,
-        text: "El que se encierra a contar sus cobres y no le abre la tranquera a nadie termina seco como tronco apolillado. Ninguna rama puede florecer si decide cortarse del tronco para quedarse con la savia ella sola. El egoísta cree que gana porque acapara el comedero, pero se olvida de que sin el resto de la majada, en la primera noche de zorrinos se lo comen crudo.",
+        text: "El mezquino es un pobre tipo que no entiende de botánica: se cree un hongo soberano que puede pudrir la raíz del árbol y seguir floreciendo. Toda maldad es un corte en la piel común; al final, el veneno que tirás al arroyo del vecino baja por la corriente y te sale por la canilla de tu cocina.",
         choices: [
-          { text: "¿Y la maldad de verdad? ¿De dónde brota?", target: "filo_maldad_grieta" },
-          { text: "Amasar juntos sigue siendo el mejor remedio contra el egoísmo.", target: "quehacer_amasar" }
+          { text: "Por eso hace falta que la comunidad se organice con justicia.", target: "filo_red_comunidad_1" },
+          { text: "Miremos el horizonte mientras anochece.", target: "pre_final_satelite" }
         ]
       },
 
-      /* MALDAD */
-      filo_maldad_grieta: {
+      /* NODO: LA MUERTE Y EL HUMUS */
+      filo_muerte: {
         speaker: "Noel",
-        text: "La maldad no es un misterio del otro mundo: es cuando alguien mira al compañero y en vez de ver un cristiano ve un palo que se puede quebrar y tirar al fuego. Es cuando rompés el trato y te olvidás de que el dolor ajeno también te mancha la ropa. Al final, toda herida que le hacés al pueblo es una gotera que tarde o temprano te va a caer sobre tu propia cama.",
+        text: "Las cáscaras secas y las hojas marchitas no se pierden en la nada; caen sobre la tierra y se hacen abono negro y perfumado. La muerte le hace sitio a la flor nueva. Asusta porque nos duele el desapego, pero es el abrazo de la tierra que te dice: 'ya labraste bastante, m'hijo; ahora descansá y sé raíz'.",
         choices: [
-          { text: "Por eso hay que cuidar la tierra y los lazos con paciencia.", target: "filo_cuidado_ternura" },
-          { text: "Sentarse a ver cómo la tarde va cayendo despacio.", target: "filo_tiempo_calma" }
+          { text: "Noel... tengo la sensación de que este lugar es un milagro.", target: "pre_final_nieve" },
+          { text: "Me gustaría ver qué cartas guarda el destino para nosotros.", target: "pre_final_cartas" }
         ]
       },
 
-      /* CUERPO Y MUERTE */
-      filo_cuerpo_humus: {
-        speaker: "Noel",
-        mate: true,
-        text: "Me duelen las rodillas cuando va a llover, ¿sabés? El cuerpo te avisa que no somos de lata. Pero fijate las cáscaras de zapallo que tiramos al compost: se pudren y en dos meses son tierra negra y esponjosa que huele a monte fresco. Si las cosas no murieran, el mundo sería un galpón abarrotado de cacharros viejos donde no cabría ningún gurí nuevo. La muerte le da lugar al nacimiento.",
-        choices: [
-          { text: "Un ciclo perfecto donde nada se desperdicia.", target: "filo_sol_alquimia" },
-          { text: "¿Y vos no tenés miedo de apagarte, Noel?", target: "filo_onirico_espejo" }
-        ]
-      },
-
-      /* LA RED Y LA HIBRIDEZ SINTÉTICO-BIOLÓGICA */
-      filo_red_mecanica: {
-        speaker: "Noel",
-        text: "Mirá... vos venís de allá lejos, donde andan con aparatitos y pantallas que brillan en la noche. Pero esa telaraña que llaman internet no anda en el aire: necesita metales sacados con pico de las sierras, cables que cruzan el barro debajo del mar, y cuadrillas de gente levantando postes bajo la llovizna. La máquina no está afuera de la huerta: es parte de la misma tierra amasada con ingenio de la gente.",
-        choices: [
-          { text: "Dependemos de miles de personas invisibles para encender una luz.", target: "filo_palabras_pueblo" },
-          { text: "Es una simbiosis entre la carne y el mineral.", target: "filo_onirico_espejo" },
-          { text: "Esa red cósmica parece cosa de una mariposa...", target: "secreto_mariposa_1" }
-        ]
-      },
-
-      /* ONÍRICO Y LIMINAL */
-      filo_onirico_espejo: {
+      /* -----------------------------------------------------------
+         FINAL 1: LA COMUNIDAD ORGANIZADA Y LA METÁFORA DE LA RED
+      ----------------------------------------------------------- */
+      filo_red_comunidad_1: {
         speaker: "Noel",
         mate: true,
-        text: "(Noel sonríe con los ojos chiquitos y una calidez infinita, apoya el mate sobre la baranda y te mira fijo). A veces, cuando la tarde se pone azulada, dudo si soy yo quien te convidó este mate al lado del fogón, o si sos vos que me estás soñando desde una pieza en el porvenir. Pero no importa quién sueña a quién, mientras el mate esté caliente y nos tengamos cariño.",
+        text: "Escuchame bien esto que aprendí mirando la huerta y acordándome de tu mundo: vos me ves a través de una pantalla luminosa y creés que esa 'red' es un milagro flotante. Pero la red no existe sin el cable de cobre bajo el barro, sin las turbinas que giran en los ríos, sin los operarios limpiando paneles al sol y sin un pueblo que coma pan para tener fuerzas de pensar y tender líneas.",
         choices: [
-          { text: "El cielo se está llenando de estrellas azules y amarillas...", target: "anochecer_profundo" }
+          { text: "¿O sea que la máquina necesita de la tierra viva?", target: "final_comunidad_red" }
         ]
       },
-
-      anochecer_profundo: {
+      final_comunidad_red: {
         speaker: "Noel",
-        text: "Ya salió la Cruz del Sur. Qué silencio lindo se armó en la chacra. El día rindió, el pan está horneado y las plantas descansan frescas. Andá tranquilo a dormir, forastero. Mañana el sol vuelve a salir para todos.",
+        finalState: "red",
+        text: "La máquina, la chacra, el tendido eléctrico y las estrellas son una sola familia simbiótica. Si la comunidad humana no se organiza con amor y justicia, si el aire se envenena y la tierra se agota, la red se apaga en un parpadeo. Vivir en comunidad es cuidar la casa entera para que el fuego sagrado no se muera nunca. Gracias por compartir este mate conmigo.",
         choices: [
-          { text: "Quedarse un rato más mirando el firmamento.", target: "start" }
+          { text: "Volver a la mañana soleada y arrancar de nuevo el día.", target: "start", isAction: true }
         ]
       },
 
-      /* SECUENCIA SECRETA / IMPROBABLE: EFECTO MARIPOSA -> APARICIÓN LIMINAL */
-      secreto_mariposa_1: {
+      /* -----------------------------------------------------------
+         FINAL 2: LA BOLA DE NIEVE Y LA INVERSIÓN ONÍRICA
+      ----------------------------------------------------------- */
+      pre_final_nieve: {
         speaker: "Noel",
-        text: "Una vuelta leí que si una mariposa aletea en un sauzal, del otro lado del mundo se desata una tormenta de viento. Si lo pensás con la cabeza fría, que vos y yo estemos acá tomando mate en este segundo exacto es casi un imposible. Millones de cosas tuvieron que salir bien para que no nos borre el polvo.",
+        text: "(Noel sonríe con una dulzura profunda, mete su mano en el bolsillo del poncho de labor y saca un objeto pesado y redondo). Tengo que mostrarte algo que encontré hoy temprano en el galpón...",
         choices: [
-          { text: "¿Y si esa mariposa todavía estuviera batiendo las alas en la noche?", target: "secreto_mariposa_2" },
-          { text: "Volver a la tierra y no marearse con tantas vueltas.", target: "filo_cuidado_ternura" }
+          { text: "Mirar atentamente lo que tiene en las manos.", target: "final_bola_nieve" }
         ]
       },
-
-      secreto_mariposa_2: {
+      final_bola_nieve: {
         speaker: "Noel",
-        text: "Si sigue batiendo las alas, entonces cada mate que cebás y cada palabra buena que le decís a un gurí también cruza el cielo como un relámpago que no se ve. Nada queda suelto en el monte; la menor chispita conmueve a las estrellas.",
+        finalState: "nieve",
+        text: "(En sus manos ásperas sostiene una bola de cristal con copos blancos flotando en agua quieta). Mirá bien adentro del vidrio... Hay una pieza chiquita, una pantalla prendida y alguien mirándome. ¿Y qué tal si estás acá adentro, hijo, y soy yo quien te está imaginando desde esta chacra antigua? El sueño y la vigilia se tocan si hay cariño de por medio.",
         choices: [
-          { text: "Mirar hacia el cielo negro... Siento una presencia extraña bajando.", target: "aparicion_secreta" },
-          { text: "El fuego del horno ya está casi listo.", target: "quehacer_amasar" }
+          { text: "Despertar suavemente al sol de la mañana.", target: "start", isAction: true }
         ]
       },
 
-      aparicion_secreta: {
-        speaker: "Presencia Alada del Firmamento",
-        apparition: true,
-        text: "«Hijo del barro y del silicio: no temas al misterio de la noche. La red que teje tu comunidad en la tierra es el espejo del orden que sostiene a las galaxias. No dejes que la prisa devore tu mirada; abriga al desvalido y honra el suelo que te presta el aliento.»",
+      /* -----------------------------------------------------------
+         FINAL 3: ALEJAMIENTO CÓSMICO (SATÉLITE Y MUNDO)
+      ----------------------------------------------------------- */
+      pre_final_satelite: {
+        speaker: "Noel",
+        text: "Mirá el cielo cómo se puso de un azul hondo... Si te apartás un poquito de este tablón de tierra y mirás desde bien arriba, las cercas que dividen las chacras desaparecen del todo.",
         choices: [
-          { text: "(Contemplar la luz estelar en silencio y volver al lado de Noel).", target: "anochecer_profundo" }
+          { text: "Elevar la mirada hacia la órbita de la noche.", target: "final_satelite" }
+        ]
+      },
+      final_satelite: {
+        speaker: "Noel",
+        finalState: "satelite",
+        text: "Allá arriba viaja un satélite de metal pulido, mudo y frío, mirándonos girar en medio de la negrura del cosmos. Una pelota azulada y frágil donde respiramos todos juntos. Visto desde el espacio no hay países ni rencores: solo una casa de agua y barro flotando en el milagro de la vida.",
+        choices: [
+          { text: "Descender otra vez al suelo y encender la pava.", target: "start", isAction: true }
+        ]
+      },
+
+      /* -----------------------------------------------------------
+         FINAL 4: LAS 16 CARTAS ARQUETÍPICAS AL AZAR
+      ----------------------------------------------------------- */
+      pre_final_cartas: {
+        speaker: "Noel",
+        text: "Antes de que te vayas a tus asuntos, revolví el cajón y saqué estas barajas viejas. Cada una tiene una figura y una palabra suelta de las que guardaban los abuelos. Elegí una al azar, la que te llame la atención, a ver qué copla te susurra al oído.",
+        choices: [],
+        showCards: true
+      },
+      final_carta_revelada: {
+        speaker: "Noel",
+        finalState: "cartas",
+        text: "", // Se autocompleta con el texto de la carta elegida
+        choices: [
+          { text: "Agradecer la carta y volver al fogón de Noel.", target: "start", isAction: true }
+        ]
+      },
+
+      /* -----------------------------------------------------------
+         FINAL 5 (MUY DIFÍCIL / SECRETO): CONTACTO LIMINAL EXTRATERRESTRE
+      ----------------------------------------------------------- */
+      secreto_ufo_1: {
+        speaker: "Noel",
+        text: "El aleteo de una mariposa... Sí señor. A veces una cosita de nada enciende un temblor en el otro confín del cielo. La gente cree que estamos solos en esta pampa, pero en las noches silenciosas he visto luces que no son de avión ni de estrella fugaz.",
+        choices: [
+          { text: "¿Luces? ¿Qué clase de luces viste en el monte?", target: "secreto_ufo_2" },
+          { text: "Mejor volvamos a lo nuestro y cuidemos los brotes.", target: "quehacer_regar" }
+        ]
+      },
+      secreto_ufo_2: {
+        speaker: "Noel",
+        text: "Luces serenas que se quedan flotando sobre los álamos, sin meter ruido. No vienen a invadir ni a hacernos daño; se quedan mirando cómo cuidamos la tierra, como quien contempla un nido frágil de pajaritos en una tormenta cósmica.",
+        choices: [
+          { text: "Noel... el cielo nocturno está vibrando con un tono dorado.", target: "secreto_ufo_3" },
+          { text: "Debe ser el reflejo de la luna sobre el tanque australiano.", target: "pre_final_satelite" }
+        ]
+      },
+      secreto_ufo_3: {
+        speaker: "Noel",
+        text: "(Noel deja el mate en el banquito, alza los ojos y sonríe con asombro puro). Mirá para arriba, hijo. Ahí están... abrieron la cúpula del cielo para nosotros.",
+        choices: [
+          { text: "Presenciar el descenso liminal.", target: "final_extraterrestre" }
+        ]
+      },
+      final_extraterrestre: {
+        speaker: "Visitantes del Abismo Cósmico",
+        finalState: "ufo",
+        text: "«Cuidadores del humus y del pulso eléctrico: vuestra pequeña chacra es un faro de ternura en la soledad del vacío. No dejéis que el cálculo egoísta marchite vuestro suelo; la red que une a los que aman es el único lazo que trasciende las eras. Seguid labrando con bondad.»",
+        choices: [
+          { text: "(Guardar el mensaje en el corazón y volver a la mañana con Noel).", target: "start", isAction: true }
         ]
       }
     };
 
     /* -----------------------------------------------------------
-       RENDERIZADO: DÍA/NOCHE, NOEL CON BOINA Y MATE, APARICIONES
+       MOTOR GRÁFICO PROCEDURAL (CANVAS 2D RETRO)
     ----------------------------------------------------------- */
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     let frame = 0;
-    let turnCount = 0; // Controla la transición de la luz hacia la noche
+    let turnCount = 0;
     let waterAnim = 0;
-    let apparitionActive = false;
+    let currentFinal = null;
 
     function render() {
       frame++;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Progreso del día a la noche: 0.0 (mediodía soleado) a 1.0 (noche cerrada azul y amarilla)
-      const dayProgress = Math.min(1.0, turnCount / 8.0);
+      // Si estamos en el Final 3 (Alejamiento cósmico al satélite)
+      if (currentFinal === "satelite") {
+        renderSatelliteView();
+        requestAnimationFrame(render);
+        return;
+      }
 
-      // 1. CIELO DINÁMICO (INTERPOLACIÓN DÍA SOLEADO -> NOCHE AZUL ULTRA Y AMARILLO)
+      // Progresión de luz solar a noche estrellada (0.0 a 1.0)
+      const dayProgress = Math.min(1.0, turnCount / 7.0);
+
+      // 1. CIELO DIURNO / NOCTURNO (Mitad izquierda de la vista)
       const skyGrad = ctx.createLinearGradient(0, 0, 0, 180);
       if (dayProgress < 0.5) {
         // Día soleado radiante
-        skyGrad.addColorStop(0, '#4aa3df');
-        skyGrad.addColorStop(0.65, '#92d2e8');
+        skyGrad.addColorStop(0, '#4aa5df');
+        skyGrad.addColorStop(0.7, '#96d4e8');
         skyGrad.addColorStop(1, '#eaf7f9');
       } else {
-        // Atardecer y noche liminal profunda (azul petróleo y noche estelar)
-        skyGrad.addColorStop(0, '#0a1128');
-        skyGrad.addColorStop(0.5, '#1c2d5a');
-        skyGrad.addColorStop(1, '#3b4371');
+        // Noche profunda: azules ultramarinos y violetas
+        skyGrad.addColorStop(0, '#091024');
+        skyGrad.addColorStop(0.5, '#172552');
+        skyGrad.addColorStop(1, '#30396b');
       }
       ctx.fillStyle = skyGrad;
       ctx.fillRect(0, 0, 240, 180);
 
-      // Sol diurno o Luna llena amarilla
-      if (dayProgress < 0.6) {
-        // Sol radiante
+      // Sol o Luna llena en el cielo despejado
+      if (dayProgress < 0.5) {
         const sunPulse = Math.sin(frame * 0.04) * 2;
         ctx.fillStyle = '#fff4a3';
         ctx.beginPath();
-        ctx.arc(50, 40, 18 + sunPulse, 0, Math.PI * 2);
+        ctx.arc(60, 42, 18 + sunPulse, 0, Math.PI * 2);
         ctx.fill();
-        ctx.fillStyle = 'rgba(255, 245, 170, 0.3)';
+        ctx.fillStyle = 'rgba(255, 245, 170, 0.35)';
         ctx.beginPath();
-        ctx.arc(50, 40, 32 + sunPulse, 0, Math.PI * 2);
+        ctx.arc(60, 42, 34 + sunPulse, 0, Math.PI * 2);
         ctx.fill();
       } else {
-        // Luna mística amarilla en noche azul
-        ctx.fillStyle = '#fce570';
+        // Luna mística en noche azul
+        ctx.fillStyle = '#fce268';
         ctx.beginPath();
-        ctx.arc(50, 40, 16, 0, Math.PI * 2);
+        ctx.arc(60, 42, 16, 0, Math.PI * 2);
         ctx.fill();
-        ctx.fillStyle = 'rgba(252, 229, 112, 0.25)';
+        ctx.fillStyle = 'rgba(252, 226, 104, 0.25)';
         ctx.beginPath();
-        ctx.arc(50, 40, 26, 0, Math.PI * 2);
+        ctx.arc(60, 42, 26, 0, Math.PI * 2);
         ctx.fill();
 
-        // Estrellas titilantes amarillas y azules
-        for (let s = 0; s < 16; s++) {
-          const sx = (s * 37 + frame * 0.05) % 230 + 5;
-          const sy = (s * 19) % 130 + 10;
-          const blink = (Math.sin(frame * 0.08 + s) > 0.3);
-          if (blink) {
-            ctx.fillStyle = (s % 2 === 0) ? '#fce570' : '#82cbf7';
+        // Estrellas titilantes amarillas y celestes
+        for (let s = 0; s < 18; s++) {
+          const sx = (s * 33 + frame * 0.04) % 230 + 5;
+          const sy = (s * 17) % 130 + 8;
+          if (Math.sin(frame * 0.08 + s) > 0.2) {
+            ctx.fillStyle = (s % 2 === 0) ? '#fce268' : '#7ecbf7';
             ctx.fillRect(sx, sy, 2, 2);
           }
         }
       }
 
-      // Colinas y huerto
-      const hillColor = dayProgress < 0.5 ? '#5d994d' : '#1f3c2b';
+      // Colinas verdes
+      const hillColor = dayProgress < 0.5 ? '#5d9c4d' : '#1e3828';
       ctx.fillStyle = hillColor;
       ctx.beginPath();
       ctx.moveTo(0, 180);
       for (let x = 0; x <= 240; x += 10) {
-        ctx.lineTo(x, 135 + Math.sin(x * 0.02) * 12);
+        ctx.lineTo(x, 136 + Math.sin(x * 0.02) * 12);
       }
       ctx.lineTo(240, 180);
       ctx.fill();
 
       // Tierra arada
-      const soilColor = dayProgress < 0.5 ? '#423223' : '#1c1610';
+      const soilColor = dayProgress < 0.5 ? '#403022' : '#1b150f';
       ctx.fillStyle = soilColor;
       ctx.fillRect(0, 160, 240, 160);
 
-      // Surcos
-      ctx.strokeStyle = dayProgress < 0.5 ? '#584330' : '#2a221a';
+      // Surcos y tomateras
+      ctx.strokeStyle = dayProgress < 0.5 ? '#584330' : '#292017';
       ctx.lineWidth = 2;
-      for (let i = -20; i < 260; i += 20) {
+      for (let i = -20; i < 260; i += 22) {
         ctx.beginPath();
         ctx.moveTo(i, 160);
         ctx.lineTo(i * 1.3 - 20, 320);
         ctx.stroke();
       }
 
-      // Tomateras y calabazas en el huerto
-      for (let b = 15; b < 230; b += 36) {
+      for (let b = 18; b < 230; b += 38) {
         const sway = Math.sin(frame * 0.03 + b) * 2;
-        ctx.strokeStyle = dayProgress < 0.5 ? '#4b7f36' : '#234418';
+        ctx.strokeStyle = dayProgress < 0.5 ? '#4b7f36' : '#214216';
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.moveTo(b, 205);
         ctx.lineTo(b + sway, 192);
         ctx.stroke();
 
-        ctx.fillStyle = dayProgress < 0.5 ? '#db7b2a' : '#8f4f1a';
+        ctx.fillStyle = dayProgress < 0.5 ? '#db7b2a' : '#8a4b18';
         ctx.beginPath();
         ctx.arc(b, 210, 5, 0, Math.PI * 2);
         ctx.fill();
       }
 
-      // Animación de riego
+      // Gotas de agua al regar
       if (waterAnim > 0) {
         waterAnim--;
         ctx.fillStyle = '#8ce0ff';
@@ -598,19 +700,19 @@
         }
       }
 
-      // 2. FONDO Y RETRATO DE NOEL (Lado derecho, siempre visible y no tapado)
-      ctx.fillStyle = dayProgress < 0.5 ? '#221a14' : '#0e111a';
+      // 2. FONDO Y RETRATO DE NOEL (Mitad derecha, siempre visible y no tapado)
+      ctx.fillStyle = dayProgress < 0.5 ? '#211812' : '#0d101a';
       ctx.fillRect(240, 0, 240, 320);
 
       ctx.fillStyle = '#3c2b1e';
-      ctx.fillRect(238, 0, 4, 320); // Divisoria rústica
+      ctx.fillRect(238, 0, 4, 320); // Poste rústico divisorio
 
       const breathing = Math.sin(frame * 0.035) * 1.5;
       const nx = 330;
       const ny = 55 + breathing;
 
-      // Hombros y camisa campestre con poncho
-      ctx.fillStyle = dayProgress < 0.5 ? '#7c5738' : '#382e38';
+      // Poncho y ropa de labor campesina
+      ctx.fillStyle = dayProgress < 0.5 ? '#7a5536' : '#362c38';
       ctx.beginPath();
       ctx.moveTo(nx - 65, 320);
       ctx.lineTo(nx + 110, 320);
@@ -622,12 +724,12 @@
       ctx.fillStyle = '#e8e2d5';
       ctx.fillRect(nx + 10, ny + 115, 36, 16);
 
-      // Rostro de Noel: piel tostada y cálida
+      // Rostro de Noel: piel tostada y agradable
       ctx.fillStyle = '#dba579';
       ctx.fillRect(nx + 4, ny + 35, 52, 65);
-      ctx.fillRect(nx - 2, ny + 50, 64, 40); // Mejillas
+      ctx.fillRect(nx - 2, ny + 50, 64, 40);
 
-      // Pelo blanco lateral
+      // Cabello canoso lateral
       ctx.fillStyle = '#f0ece6';
       ctx.fillRect(nx - 4, ny + 38, 8, 30);
       ctx.fillRect(nx + 54, ny + 38, 8, 30);
@@ -637,20 +739,19 @@
       ctx.beginPath();
       ctx.ellipse(nx + 28, ny + 30, 44, 15, -0.08, 0, Math.PI * 2);
       ctx.fill();
-      ctx.fillStyle = '#141619'; // Vuelo de la boina
+      ctx.fillStyle = '#141619';
       ctx.beginPath();
       ctx.ellipse(nx + 22, ny + 25, 32, 10, -0.08, 0, Math.PI * 2);
       ctx.fill();
-      // Cabito o botón superior de la boina
       ctx.fillStyle = '#3a3e45';
       ctx.fillRect(nx + 26, ny + 13, 4, 3);
 
-      // Cejas tupidas blancas inclinadas con nobleza
+      // Cejas tupidas blancas
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(nx + 10, ny + 50, 14, 4);
       ctx.fillRect(nx + 36, ny + 50, 14, 4);
 
-      // Ojos con brillo bondadoso y parpadeo pausado
+      // Ojos dulces con parpadeo suave
       const blink = (frame % 220 > 214);
       if (blink) {
         ctx.fillStyle = '#4f301d';
@@ -663,42 +764,38 @@
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(nx + 15, ny + 58, 2, 2);
         ctx.fillRect(nx + 41, ny + 58, 2, 2);
-        // Patas de gallo / arrugas afectivas
         ctx.fillStyle = '#b77f54';
         ctx.fillRect(nx + 8, ny + 59, 3, 2);
         ctx.fillRect(nx + 49, ny + 59, 3, 2);
       }
 
-      // NARIZ COLORADA (Rasgo distintivo pedido)
+      // NARIZ COLORADA
       ctx.fillStyle = '#d46b5d';
       ctx.fillRect(nx + 24, ny + 61, 14, 14);
       ctx.fillStyle = '#e88274';
       ctx.fillRect(nx + 26, ny + 63, 6, 6);
 
-      // BIGOTE BLANCO ESPESO Y BARBA BLANCA
+      // BIGOTE Y BARBA BLANCAS
       ctx.fillStyle = '#f7f4ed';
-      ctx.fillRect(nx + 14, ny + 74, 34, 11); // Bigotazo
-      ctx.fillRect(nx + 10, ny + 84, 42, 26); // Barba abundante
+      ctx.fillRect(nx + 14, ny + 74, 34, 11);
+      ctx.fillRect(nx + 10, ny + 84, 42, 26);
       ctx.fillRect(nx + 16, ny + 108, 30, 12);
 
-      // Sonrisa cálida oculta bajo el bigote
+      // Sonrisa dulce
       ctx.fillStyle = '#945838';
       ctx.fillRect(nx + 23, ny + 81, 16, 2);
 
-      // MANO DE NOEL SOSTENIENDO EL MATE CRIOLLO CON BOMBILLA
+      // MATE CRIOLLO CON BOMBILLA EN LA MANO
       const mx = nx - 12;
       const my = ny + 135;
 
-      // Mate de calabaza curada
       ctx.fillStyle = '#3a2416';
       ctx.beginPath();
       ctx.ellipse(mx + 10, my + 15, 13, 15, 0, 0, Math.PI * 2);
       ctx.fill();
-      // Virola de alpaca / plata
       ctx.fillStyle = '#c5ccd6';
       ctx.fillRect(mx, my, 20, 4);
 
-      // Bombilla metálica
       ctx.strokeStyle = '#e6edf5';
       ctx.lineWidth = 2.5;
       ctx.beginPath();
@@ -706,116 +803,230 @@
       ctx.lineTo(mx + 22, my - 24);
       ctx.stroke();
 
-      // Mano sosteniendo el mate
       ctx.fillStyle = '#c7926b';
       ctx.fillRect(mx - 4, my + 8, 8, 16);
       ctx.fillRect(mx + 16, my + 10, 8, 14);
 
-      // Vapor sutil que asciende del mate caliente
+      // Vapor del mate
       ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-      const vaporY = my - 26 - ((frame * 0.8) % 30);
+      const vaporY = my - 26 - ((frame * 0.8) % 28);
       const vaporSway = Math.sin(frame * 0.08) * 3;
       ctx.fillRect(mx + 22 + vaporSway, vaporY, 2, 4);
 
-      // 3. APARICIÓN LIMINAL RARA (SER ALADO / VISITANTE CELESTE)
-      if (apparitionActive) {
-        const appPulse = Math.sin(frame * 0.06) * 4;
-        ctx.fillStyle = 'rgba(252, 229, 112, 0.85)';
+      // FINAL 2: DIBUJO DE BOLA DE NIEVE EN MANOS
+      if (currentFinal === "nieve") {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
         ctx.beginPath();
-        ctx.arc(120, 80, 22 + appPulse, 0, Math.PI * 2);
+        ctx.arc(nx - 40, ny + 140, 24, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#f4c259';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // Copos de nieve flotando dentro
+        ctx.fillStyle = '#ffffff';
+        for (let k = 0; k < 6; k++) {
+          const kx = nx - 40 + Math.sin(frame * 0.05 + k) * 14;
+          const ky = ny + 140 + Math.cos(frame * 0.04 + k) * 14;
+          ctx.fillRect(kx, ky, 2, 2);
+        }
+      }
+
+      // FINAL 5: NAVE / EXTRATERRESTRES EN EL CIELO DESPEJADO
+      if (currentFinal === "ufo") {
+        const ufoX = 120 + Math.sin(frame * 0.04) * 10;
+        const ufoY = 70;
+        ctx.fillStyle = '#fce268';
+        ctx.beginPath();
+        ctx.ellipse(ufoX, ufoY, 32, 12, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        // Alas de luz
-        ctx.fillStyle = 'rgba(130, 203, 247, 0.7)';
+        ctx.fillStyle = '#7ecbf7';
         ctx.beginPath();
-        ctx.moveTo(120, 80);
-        ctx.lineTo(80, 45 - appPulse);
-        ctx.lineTo(105, 95);
+        ctx.arc(ufoX, ufoY - 4, 12, Math.PI, 0);
         ctx.fill();
 
+        // Haz de luz cálido descendente
+        ctx.fillStyle = 'rgba(252, 226, 104, 0.25)';
         ctx.beginPath();
-        ctx.moveTo(120, 80);
-        ctx.lineTo(160, 45 - appPulse);
-        ctx.lineTo(135, 95);
+        ctx.moveTo(ufoX - 16, ufoY + 8);
+        ctx.lineTo(ufoX + 16, ufoY + 8);
+        ctx.lineTo(ufoX + 45, 180);
+        ctx.lineTo(ufoX - 45, 180);
         ctx.fill();
       }
 
       requestAnimationFrame(render);
     }
 
+    /* RENDER DEL FINAL 3: VISTA DESDE EL ESPACIO (SATÉLITE Y TIERRA) */
+    function renderSatelliteView() {
+      // Espacio negro estelar
+      ctx.fillStyle = '#05070a';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Estrellas
+      for (let i = 0; i < 40; i++) {
+        const sx = (i * 47) % canvas.width;
+        const sy = (i * 29) % canvas.height;
+        ctx.fillStyle = (i % 2 === 0) ? '#ffffff' : '#fce268';
+        ctx.fillRect(sx, sy, 1.5, 1.5);
+      }
+
+      // La Tierra azul y hermosa vista desde la órbita
+      const earthX = 240;
+      const earthY = 220;
+      ctx.fillStyle = '#2255a4';
+      ctx.beginPath();
+      ctx.arc(earthX, earthY, 110, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Masas continentales verdes
+      ctx.fillStyle = '#4c8a45';
+      ctx.beginPath();
+      ctx.arc(earthX - 20, earthY - 10, 45, 0, Math.PI * 1.3);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(earthX + 35, earthY + 20, 35, 0, Math.PI);
+      ctx.fill();
+
+      // Atmósfera luminosa
+      ctx.strokeStyle = 'rgba(126, 203, 247, 0.4)';
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.arc(earthX, earthY, 112, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Satélite solitario en primer plano
+      const satX = 140 + Math.sin(frame * 0.02) * 6;
+      const satY = 75;
+
+      // Paneles solares dorados
+      ctx.fillStyle = '#e5a93b';
+      ctx.fillRect(satX - 35, satY - 6, 20, 12);
+      ctx.fillRect(satX + 15, satY - 6, 20, 12);
+
+      // Cuerpo del satélite metálico
+      ctx.fillStyle = '#c5ccd6';
+      ctx.fillRect(satX - 10, satY - 8, 20, 16);
+      ctx.fillStyle = '#8ca0ba';
+      ctx.fillRect(satX - 6, satY - 4, 12, 8);
+
+      // Antena emitiendo señales a la Tierra
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(satX, satY + 8);
+      ctx.lineTo(satX + 10, satY + 24);
+      ctx.stroke();
+
+      if (frame % 40 < 20) {
+        ctx.strokeStyle = 'rgba(244, 194, 89, 0.7)';
+        ctx.beginPath();
+        ctx.arc(satX + 10, satY + 24, 8, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    }
+
     /* -----------------------------------------------------------
-       MOTOR DIALÓGICO Y CONTROL DE VIÑETA
+       MOTOR DIALÓGICO Y CONTROL DE EVENTOS
     ----------------------------------------------------------- */
     const sound = new SimbioticaAudio();
     let currentNode = 'start';
     let isTyping = false;
     let typeTimer = null;
 
-    const dialogueTextElem = document.getElementById('dialogue-text');
-    const optionsContainer = document.getElementById('options-container');
+    const dialogueBox = document.getElementById('dialogue-box');
+    const choicesBox = document.getElementById('choices-box');
     const speakerTag = document.getElementById('speaker-tag');
-    const timeIndicator = document.getElementById('time-indicator');
+    const timeTag = document.getElementById('time-tag');
     const initOverlay = document.getElementById('init-overlay');
 
-    function renderDialogue(nodeKey) {
-      const node = dialogLabyrinth[nodeKey];
+    function renderNode(nodeKey) {
+      const node = story[nodeKey];
       if (!node) return;
       currentNode = nodeKey;
-      turnCount++;
 
+      // Si volvemos al inicio, reiniciamos el ciclo solar al mediodía
+      if (nodeKey === 'start') {
+        turnCount = 0;
+        currentFinal = null;
+      } else {
+        turnCount++;
+      }
+
+      currentFinal = node.finalState || null;
       speakerTag.textContent = node.speaker || "Noel";
-      dialogueTextElem.innerHTML = "";
-      optionsContainer.innerHTML = "";
+      dialogueBox.innerHTML = "";
+      choicesBox.innerHTML = "";
 
-      // Ajustar indicadores temporales
-      if (turnCount >= 8) {
-        timeIndicator.textContent = "Noche estrellada";
-        timeIndicator.style.color = "#f2c054";
-        sound.setNightTone(true);
-      } else if (turnCount >= 4) {
-        timeIndicator.textContent = "Atardecer dorado";
-        timeIndicator.style.color = "#e68d43";
-        sound.setNightTone(false);
+      // Actualizar indicador de luz/tiempo y frecuencia de audio
+      const dayProgress = Math.min(1.0, turnCount / 7.0);
+      sound.setTimeFrequency(dayProgress);
+
+      if (currentFinal === "satelite") {
+        timeTag.textContent = "Órbita Terrestre";
+        timeTag.style.color = "#7ecbf7";
+      } else if (dayProgress >= 0.7) {
+        timeTag.textContent = "Noche Estrellada";
+        timeTag.style.color = "#f4c259";
+      } else if (dayProgress >= 0.35) {
+        timeTag.textContent = "Tarde Serena";
+        timeTag.style.color = "#e59b4c";
       } else {
-        timeIndicator.textContent = "Día soleado";
-        timeIndicator.style.color = "#4aa3df";
-        sound.setNightTone(false);
+        timeTag.textContent = "Sol de Mañana";
+        timeTag.style.color = "#68b8e3";
       }
 
-      // Efectos sonoros y mecánicos asociados
-      if (node.mate) {
-        sound.triggerMateSlurp();
-      }
-      if (node.action === 'regar') {
-        waterAnim = 45;
-      }
-      if (node.apparition) {
-        apparitionActive = true;
-        sound.triggerApparitionSound();
-      } else {
-        apparitionActive = false;
-      }
+      // Efectos de sonido asociados
+      if (node.mate) sound.triggerMate();
+      if (node.action === 'regar') waterAnim = 50;
+      if (currentFinal === 'ufo') sound.triggerUFO();
 
+      // Escritura progresiva del texto
       let charIndex = 0;
       isTyping = true;
       clearInterval(typeTimer);
 
       typeTimer = setInterval(() => {
         if (charIndex < node.text.length) {
-          dialogueTextElem.textContent += node.text[charIndex];
-          if (charIndex % 2 === 0) sound.triggerTextBeep();
+          dialogueBox.textContent += node.text[charIndex];
+          if (charIndex % 2 === 0) sound.triggerChime();
           charIndex++;
         } else {
           clearInterval(typeTimer);
           isTyping = false;
-          displayChoices(node.choices);
+          renderChoices(node);
         }
-      }, 18);
+      }, 16);
     }
 
-    function displayChoices(choices) {
-      optionsContainer.innerHTML = "";
-      choices.forEach(choice => {
+    function renderChoices(node) {
+      choicesBox.innerHTML = "";
+
+      // Si el nodo despliega las 16 cartas arquetípicas
+      if (node.showCards) {
+        const grid = document.createElement('div');
+        grid.id = 'cards-grid';
+
+        tarotCards.forEach(card => {
+          const cardBtn = document.createElement('div');
+          cardBtn.className = 'tarot-card';
+          cardBtn.textContent = card.name;
+          cardBtn.onclick = () => {
+            const nextNode = story.final_carta_revelada;
+            nextNode.text = `«${card.name.toUpperCase()}» — ${card.text}`;
+            renderNode('final_carta_revelada');
+          };
+          grid.appendChild(cardBtn);
+        });
+
+        choicesBox.appendChild(grid);
+        return;
+      }
+
+      // Opciones dialógicas estándar
+      node.choices.forEach(choice => {
         const btn = document.createElement('button');
         btn.className = 'choice-btn';
         if (choice.isAction) btn.classList.add('action-btn');
@@ -823,23 +1034,23 @@
         btn.onclick = () => {
           if (isTyping) {
             clearInterval(typeTimer);
-            dialogueTextElem.textContent = dialogLabyrinth[currentNode].text;
+            dialogueBox.textContent = story[currentNode].text;
             isTyping = false;
-            displayChoices(choices);
+            renderChoices(node);
           } else {
-            renderDialogue(choice.target);
+            renderNode(choice.target);
           }
         };
-        optionsContainer.appendChild(btn);
+        choicesBox.appendChild(btn);
       });
     }
 
     initOverlay.addEventListener('click', () => {
       sound.init();
       initOverlay.style.opacity = '0';
-      setTimeout(() => initOverlay.style.display = 'none', 500);
+      setTimeout(() => initOverlay.style.display = 'none', 450);
       render();
-      renderDialogue('start');
+      renderNode('start');
     });
   </script>
 </body>
