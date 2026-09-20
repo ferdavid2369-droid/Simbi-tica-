@@ -7,35 +7,34 @@
   <style>
     :root {
       --crt-tint: rgba(255, 255, 240, 0.03);
-      --amber-warm: #f3dfa2;
-      --bg-canvas: #101416;
-      --panel-bg: rgba(22, 28, 34, 0.95);
-      --border-wood: #826f55;
-      --accent-sun: #ebb54c;
-      --plant-green: #7ca96a;
+      --bg-dark: #070a0d;
+      --bubble-bg: rgba(25, 30, 38, 0.94);
+      --bubble-border: #968364;
+      --bubble-text: #f7f4ea;
+      --accent-gold: #f2c054;
+      --accent-blue: #4aa3df;
+      --accent-green: #8ec378;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body, html {
       width: 100%;
       height: 100%;
-      background-color: var(--bg-canvas);
+      background-color: var(--bg-dark);
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
       font-family: "Courier New", Courier, monospace;
-      color: #ede6d6;
+      color: var(--bubble-text);
     }
     #viewport-container {
       position: relative;
       width: 980px;
-      height: 650px;
+      height: 640px;
       background: #000;
-      box-shadow: 0 0 70px rgba(0,0,0,0.95), 0 0 24px rgba(235, 181, 76, 0.2);
+      box-shadow: 0 0 70px rgba(0,0,0,0.95), 0 0 24px rgba(242, 192, 84, 0.15);
       border-radius: 14px;
       overflow: hidden;
-      display: flex;
-      flex-direction: column;
     }
     canvas {
       display: block;
@@ -47,84 +46,104 @@
     .crt-overlay {
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.24) 50%), 
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.22) 50%), 
                   linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
       background-size: 100% 3px, 5px 100%;
       pointer-events: none;
-      box-shadow: inset 0 0 80px rgba(0,0,0,0.75);
+      box-shadow: inset 0 0 80px rgba(0,0,0,0.8);
     }
-    #ui-layer {
+
+    /* SISTEMA DE VIÑETAS LATERALES QUE NO TAPAS EL ROSTRO NI EL MATE */
+    #speech-bubble-container {
       position: absolute;
-      bottom: 16px;
-      left: 2%;
-      width: 96%;
-      min-height: 220px;
-      background: var(--panel-bg);
-      border: 2px solid var(--border-wood);
-      box-shadow: 0 0 0 1px #1a1510, inset 0 0 16px rgba(0,0,0,0.88);
-      padding: 14px 20px;
+      top: 24px;
+      left: 20px;
+      width: 440px;
+      background: var(--bubble-bg);
+      border: 2px solid var(--bubble-border);
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.8), inset 0 0 10px rgba(0,0,0,0.6);
+      padding: 16px 18px;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      backdrop-filter: blur(4px);
+      gap: 10px;
+      z-index: 10;
+      backdrop-filter: blur(3px);
     }
-    #header-status {
+    /* Rabillo de viñeta orientado hacia Noel */
+    #speech-bubble-container::after {
+      content: "";
+      position: absolute;
+      top: 70px;
+      right: -14px;
+      border-width: 8px 0 8px 14px;
+      border-style: solid;
+      border-color: transparent transparent transparent var(--bubble-border);
+      display: block;
+      width: 0;
+    }
+    #bubble-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid #4a4135;
-      padding-bottom: 6px;
-      margin-bottom: 8px;
+      border-bottom: 1px solid #473e33;
+      padding-bottom: 4px;
     }
     #speaker-tag {
-      font-size: 13px;
+      font-size: 12px;
       text-transform: uppercase;
       letter-spacing: 2px;
-      color: var(--accent-sun);
+      color: var(--accent-gold);
       font-weight: bold;
     }
-    #meta-state {
-      font-size: 12px;
-      color: var(--plant-green);
+    #time-indicator {
+      font-size: 11px;
+      color: var(--accent-blue);
       letter-spacing: 1px;
     }
     #dialogue-text {
-      font-size: 14px;
-      line-height: 1.55;
-      color: #f7f4ea;
-      min-height: 84px;
+      font-size: 13.5px;
+      line-height: 1.5;
+      color: #faf7ee;
+      min-height: 85px;
       text-shadow: 1px 1px 2px rgba(0,0,0,0.9);
     }
     #options-container {
       display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-top: 8px;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 4px;
+      max-height: 220px;
+      overflow-y: auto;
     }
     .choice-btn {
-      background: #222830;
-      border: 1px solid #546070;
-      color: #e8e2d2;
-      padding: 6px 12px;
+      background: #1e242c;
+      border: 1px solid #485465;
+      color: #ede6d6;
+      padding: 7px 10px;
+      border-radius: 6px;
       font-family: inherit;
       font-size: 12px;
       cursor: pointer;
-      transition: all 0.15s ease;
       text-align: left;
+      line-height: 1.35;
+      transition: all 0.15s ease;
     }
     .choice-btn:hover {
-      background: #394452;
+      background: #343f4d;
       color: #fff;
-      border-color: var(--accent-sun);
+      border-color: var(--accent-gold);
+      transform: translateX(2px);
     }
-    .action-highlight {
-      border-color: var(--plant-green) !important;
-      color: #bbf0a8 !important;
+    .action-btn {
+      border-color: var(--accent-green) !important;
+      color: #c9f5b5 !important;
     }
+
     #init-overlay {
       position: absolute;
       inset: 0;
-      background: #111518;
+      background: #0d1114;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -142,65 +161,71 @@
     <canvas id="gameCanvas" width="480" height="320"></canvas>
     <div class="crt-overlay"></div>
     
-    <div id="ui-layer">
-      <div id="header-status">
-        <div id="speaker-tag">Aurelio</div>
-        <div id="meta-state">Huerto: Vivo | Entramado: Abierto</div>
+    <div id="speech-bubble-container">
+      <div id="bubble-header">
+        <div id="speaker-tag">Noel</div>
+        <div id="time-indicator">Día soleado</div>
       </div>
       <div id="dialogue-text"></div>
       <div id="options-container"></div>
     </div>
 
     <div id="init-overlay">
-      <h1 style="letter-spacing: 5px; margin-bottom: 12px; color: #ebb54c; font-size: 26px;">SIMBIÓTICA</h1>
-      <p style="font-size: 13px; max-width: 520px; line-height: 1.6; color: #a9a293;">
-        "Ninguna hoja cae sin que el bosque entero modifique su centro de gravedad."<br><br>
-        Toca para sintonizar con la mañana y pisar la tierra.
+      <h1 style="letter-spacing: 5px; margin-bottom: 12px; color: #f2c054; font-size: 26px;">SIMBIÓTICA</h1>
+      <p style="font-size: 13px; max-width: 480px; line-height: 1.6; color: #aca596;">
+        "El mate se ceba con agua tibia y la vida se sostiene con las manos de todos."<br><br>
+        Toca para acercarte al fogón con Noel.
       </p>
     </div>
   </div>
 
   <script>
     /* -----------------------------------------------------------
-       PAISAJE SONORO PROCEDURAL: CAMPOS DIURNOS Y TRINOS BOTÁNICOS
+       PAISAJE SONORO PROCEDURAL: DÍA, NOCHE Y CAMPANAS ONÍRICAS
     ----------------------------------------------------------- */
     class SimbioticaAudio {
       constructor() {
         this.ctx = null;
         this.started = false;
+        this.filter = null;
+        this.droneGain = null;
       }
       init() {
         this.ctx = new (window.AudioContext || window.webkitAudioContext)();
         this.started = true;
-        this.playWarmDrone();
-        this.startBirdChirps();
+        this.playDrone();
+        this.startGenerativeMelody();
       }
-      playWarmDrone() {
-        // Acorde mayor cálido y orgánico (Fa mayor con novena: F - C - G - A)
-        const freqs = [174.61, 261.63, 392.00, 440.00];
+      playDrone() {
+        const freqs = [146.83, 220.00, 293.66, 369.99]; // Re mayor acústico y acogedor
+        this.filter = this.ctx.createBiquadFilter();
+        this.filter.type = 'lowpass';
+        this.filter.frequency.setValueAtTime(400, this.ctx.currentTime);
+
+        this.droneGain = this.ctx.createGain();
+        this.droneGain.gain.setValueAtTime(0.008, this.ctx.currentTime);
+        this.filter.connect(this.droneGain);
+        this.droneGain.connect(this.ctx.destination);
+
         freqs.forEach(f => {
           const osc = this.ctx.createOscillator();
-          const gain = this.ctx.createGain();
           osc.type = 'triangle';
           osc.frequency.setValueAtTime(f, this.ctx.currentTime);
-          gain.gain.setValueAtTime(0.007, this.ctx.currentTime);
-          
-          const filter = this.ctx.createBiquadFilter();
-          filter.type = 'lowpass';
-          filter.frequency.setValueAtTime(420, this.ctx.currentTime);
-          
-          osc.connect(filter);
-          filter.connect(gain);
-          gain.connect(this.ctx.destination);
+          osc.connect(this.filter);
           osc.start();
         });
       }
-      triggerTextChime() {
+      setNightTone(isNight) {
+        if (!this.ctx || !this.filter) return;
+        const targetFreq = isNight ? 220 : 450;
+        this.filter.frequency.exponentialRampToValueAtTime(targetFreq, this.ctx.currentTime + 3);
+      }
+      triggerTextBeep() {
         if (!this.started) return;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(490 + Math.random() * 40, this.ctx.currentTime);
+        osc.frequency.setValueAtTime(480 + Math.random() * 40, this.ctx.currentTime);
         gain.gain.setValueAtTime(0.01, this.ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.05);
         osc.connect(gain);
@@ -208,412 +233,518 @@
         osc.start();
         osc.stop(this.ctx.currentTime + 0.05);
       }
-      triggerWaterSound() {
+      triggerMateSlurp() {
         if (!this.started) return;
-        for (let i = 0; i < 4; i++) {
+        for (let i = 0; i < 3; i++) {
           setTimeout(() => {
             const osc = this.ctx.createOscillator();
             const gain = this.ctx.createGain();
-            osc.type = 'sine';
-            const f = 600 + Math.random() * 400;
-            osc.frequency.setValueAtTime(f, this.ctx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(f - 250, this.ctx.currentTime + 0.12);
-            gain.gain.setValueAtTime(0.02, this.ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.12);
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(700 - i * 80, this.ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(300, this.ctx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.015, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.1);
             osc.connect(gain);
             gain.connect(this.ctx.destination);
             osc.start();
-            osc.stop(this.ctx.currentTime + 0.12);
-          }, i * 60);
+            osc.stop(this.ctx.currentTime + 0.1);
+          }, i * 70);
         }
       }
-      startBirdChirps() {
-        setInterval(() => {
-          if (!this.started || Math.random() > 0.45) return;
+      triggerApparitionSound() {
+        if (!this.started) return;
+        const chords = [523.25, 659.25, 783.99, 1046.50];
+        chords.forEach(c => {
           const osc = this.ctx.createOscillator();
           const gain = this.ctx.createGain();
           osc.type = 'sine';
-          const baseF = 1700 + Math.random() * 500;
-          osc.frequency.setValueAtTime(baseF, this.ctx.currentTime);
-          osc.frequency.exponentialRampToValueAtTime(baseF + 350, this.ctx.currentTime + 0.07);
-          osc.frequency.exponentialRampToValueAtTime(baseF - 200, this.ctx.currentTime + 0.14);
-          gain.gain.setValueAtTime(0.012, this.ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.15);
+          osc.frequency.setValueAtTime(c, this.ctx.currentTime);
+          gain.gain.setValueAtTime(0.02, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 3.5);
           osc.connect(gain);
           gain.connect(this.ctx.destination);
           osc.start();
-          osc.stop(this.ctx.currentTime + 0.15);
-        }, 3400);
+          osc.stop(this.ctx.currentTime + 3.5);
+        });
+      }
+      startGenerativeMelody() {
+        const notes = [293.66, 329.63, 369.99, 440.00, 493.88];
+        setInterval(() => {
+          if (!this.started || Math.random() > 0.4) return;
+          const note = notes[Math.floor(Math.random() * notes.length)];
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(note, this.ctx.currentTime);
+          gain.gain.setValueAtTime(0.02, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 2.5);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + 2.5);
+        }, 4000);
       }
     }
 
     /* -----------------------------------------------------------
-       LABERINTO NARRATIVO Y DIALÓGICO RIZOMÁTICO
+       LABERINTO DIALÓGICO: LO COTIDIANO, LA RED Y LO LIMINAL
     ----------------------------------------------------------- */
-    const labyrinth = {
+    const dialogLabyrinth = {
       start: {
-        speaker: "Aurelio",
-        text: "¡Qué dicha recibirte con esta claridad! Mirá cómo calienta el sol: no es solo lumbre en los ojos, es el motor que despierta la clorofila de los surcos. La huerta está sedienta y el día nos pide labor. ¿Qué senda abrimos juntos hoy?",
+        speaker: "Noel",
+        text: "Tomá, agarrá el mate que recién lo ensillé con yerba buena. Mirá qué lindo sol tenemos sobre el tablón de las verduras. Estaba pensando en ponerme a regar los tomates o arrancar el fuego para amasar el pan de la tarde. ¿Por dónde empezamos la ronda?",
         choices: [
-          { text: "Tomar la regadera y verter agua fresca sobre los plantines.", target: "accion_regar" },
-          { text: "Preparar el guiso comunitario con las verduras cosechadas.", target: "accion_cocinar" },
-          { text: "Cargar las cestas para llevar el excedente al mercado.", target: "accion_mercado" },
-          { text: "Preguntarle por qué insiste tanto en el sol.", target: "filo_sol_alquimia" }
+          { text: "Aceptar el mate y mirar los plantines que piden agua.", target: "quehacer_regar", isAction: true },
+          { text: "Ayudarlo a encender el horno de barro para el pan.", target: "quehacer_amasar", isAction: true },
+          { text: "Acomodar los cajones para llevar la verdura a la feria.", target: "quehacer_feria", isAction: true },
+          { text: "Preguntarle por qué madruga tanto si el campo no se va a escapar.", target: "filo_tiempo_calma" }
         ]
       },
 
-      /* RAMA 1: ACCIÓN REGAR -> SENSIBILIDAD, CUIDADO Y METÁFORAS BOTÁNICAS */
-      accion_regar: {
-        speaker: "Aurelio",
+      /* RAMA AMASADO Y COMUNIDAD */
+      quehacer_amasar: {
+        speaker: "Noel",
+        mate: true,
+        text: "El secreto del pan no está en la harina ni en la levadura, hijo. Está en la fuerza con que uno hunde los nudillos pensando en la mesa ajena. Si amaso apurado y con bronca, la miga sale apelmazada y agria. Amasar con cariño para los vecinos hace que la hogaza rinda el doble; cuando uno produce sabiendo que otro va a comer, el trabajo deja de ser una carga y se vuelve un abrazo.",
+        choices: [
+          { text: "¿Y si cada familia amasara únicamente lo suyo y se cerrara en su casa?", target: "filo_egoismo_soledad" },
+          { text: "Huele a leña buena... Todo esto requiere tiempo y paciencia.", target: "filo_tiempo_calma" },
+          { text: "¿No te cansa entregarte tanto a gente que a veces ni te agradece?", target: "filo_cuidado_ternura" }
+        ]
+      },
+
+      /* RAMA REGAR Y BOTÁNICA */
+      quehacer_regar: {
+        speaker: "Noel",
         action: "regar",
-        text: "Sentí el olor a tierra mojada cuando cae el chorro... Eso es la geosmina, un mensaje químico que las bacterias liberan para avisar que la vida sigue. El agua no 'ordena' al brote crecer: solo lo atiende. La verdadera ética es la del cuidado, como decía doña Carol Gilligan: no consiste en juzgar con leyes frías y universales, sino en responder con ternura a la fragilidad concreta del que tenemos enfrente.",
+        text: "Fijate cómo la tierra reseca chupa el agua con un suspiro. Las plantas son sabias: el tomate no compite a los empujones con la albahaca; se cuidan juntos de las pestes bajo tierra en un entrevero de raíces. Si el tallo se encapricha en guardar toda el agua para sí solo, la tierra se seca alrededor y termina secándose él también. Vivir es convidar.",
         choices: [
-          { text: "¿La ternura puede ser un principio ontológico y no solo moral?", target: "filo_sensibilidad" },
-          { text: "¿Y qué pasa con las malas hierbas? ¿Hay maldad en la huerta?", target: "filo_maldad" },
-          { text: "La planta busca la luz por puro deseo...", target: "filo_deseo" }
+          { text: "Es impresionante cómo buscan la luz del sol sin que nadie se los mande.", target: "filo_sol_alquimia" },
+          { text: "¿A veces no sentís bronca cuando una plaga te arruina la siembra?", target: "filo_maldad_grieta" },
+          { text: "Pensar que un aleteo o una lluvia a destiempo puede cambiarlo todo...", target: "secreto_mariposa_1" }
         ]
       },
 
-      filo_sensibilidad: {
-        speaker: "Aurelio",
-        text: "La sensibilidad es el principio mismo del ser, hijo. Antes de que hubiese razón o códigos calculadores, ya había una membrana celular que sentía frío o calor, que buscaba el azúcar y rehuía del veneno. El universo se siente a sí mismo a través de nuestras manos llenas de barro y de tus ojos asombrados.",
+      /* RAMA FERIA Y MERCADO */
+      quehacer_feria: {
+        speaker: "Noel",
+        mate: true,
+        text: "Carguemos estos zapallos plomo en la chata. En el pueblo necesito cambiar tres calabazas por la grasa del carnicero y la tijera que me afiló don Sosa. Si me quedara acá solo en la tapera comiendo zapallo todos los días, me volvería un bicho huraño. El mercado de la plaza es el lugar donde los oficios se encuentran y nadie sobra.",
         choices: [
-          { text: "Pero ese cuerpo que siente también envejece y muere.", target: "filo_cuerpo_muerte" },
-          { text: "Aun así, a veces la gente solo piensa en sí misma.", target: "filo_egoismo" },
-          { text: "Volver a la tierra y seguir cuidando el huerto.", target: "accion_regar" }
+          { text: "Sin los demás, hasta las palabras perderían su sentido.", target: "filo_palabras_pueblo" },
+          { text: "¿Y qué pasa con los que van a la feria solo a especular y acaparar?", target: "filo_egoismo_soledad" },
+          { text: "Todo parece una telaraña gigante donde cada hilo sostiene al otro.", target: "filo_red_mecanica" }
         ]
       },
 
-      /* RAMA 2: ACCIÓN COCINAR -> COSTO DE OPORTUNIDAD, LENGUAJE Y DESTINO */
-      accion_cocinar: {
-        speaker: "Aurelio",
-        text: "Picar la cebolla hace llorar los ojos, pero ese aroma llena el patio. Al dedicar la mañana entera a este caldero, dejamos de reparar el techo del granero. Ese es el costo de oportunidad: cada renuncia dibuja el perfil de lo que amamos. Pero el sacrificio del tiempo propio es la única moneda real que alimenta a los demás.",
+      /* TIEMPO Y DESTINO */
+      filo_tiempo_calma: {
+        speaker: "Noel",
+        mate: true,
+        text: "Mirá el humo del pucho y el vapor de la pava... Se van despacito hacia el cielo y no vuelven. Uno no puede apurar el brote de una semilla tirándole de las hojas para que crezca más rápido; sólo conseguís arrancarla de raíz. El tiempo de la chacra enseña a esperar. Las cosas maduran cuando tienen que madurar, no cuando a uno se le antoja.",
         choices: [
-          { text: "¿Y si este encuentro entre los dos ya estaba predestinado?", target: "filo_destino_voluntad" },
-          { text: "¿Por qué necesitamos nombrar cada verdura y cada tarea?", target: "filo_lenguaje_comunidad" },
-          { text: "A veces el cansancio pesa sobre el cuerpo...", target: "filo_cuerpo_muerte" }
+          { text: "¿Y nosotros podemos elegir nuestro rumbo o la correntada nos lleva?", target: "filo_destino_rio" },
+          { text: "A veces me asusta ver cómo se pasa la vida y el cuerpo envejece.", target: "filo_cuerpo_humus" },
+          { text: "Cebar otro mate y disfrutar de la quietud.", target: "start" }
         ]
       },
 
-      filo_lenguaje_comunidad: {
-        speaker: "Aurelio",
-        text: "El sabio Wittgenstein lo demostró con serenidad: no existe el lenguaje privado. Si hubieses nacido solo en una cueva infinita, tus balbuceos no serían palabras, porque nadie podría confirmar si aplicás bien o mal la regla. Hablar es bailar con los ancestros; cada vocablo tuyo es una deuda de amor con el pueblo que lo acuñó.",
+      /* EL RÍO DEL DESTINO */
+      filo_destino_rio: {
+        speaker: "Noel",
+        text: "El río tiene su lecho de piedras hondas, y a ese cauce lo manda la montaña; uno no inventa la gravedad ni la tormenta que viene del sur. Pero el timón del bote es tuyo, y si ves a un vecino ahogándose en la orilla, nadie te prohíbe arrimar la canoa y estirarle la mano. Ahí está la libertad: no en caprichos tontos, sino en remar juntos contra la creciente.",
         choices: [
-          { text: "Entonces el egoísmo absoluto es un contrasentido lingüístico.", target: "filo_egoismo" },
-          { text: "¿Y cómo se conecta esa palabra con la red que nos comunica hoy?", target: "filo_red_hibrida" }
+          { text: "Una mínima decisión a tiempo salva una vida entera.", target: "secreto_mariposa_1" },
+          { text: "Como cuidar a los plantines chicos frente a la helada.", target: "filo_cuidado_ternura" }
         ]
       },
 
-      filo_destino_voluntad: {
-        speaker: "Aurelio",
-        text: "La bellota tiene en su vientre el destino de ser roble o pudrirse; no puede elegir ser águila. Hay leyes cósmicas que son nuestro cauce inevitable. Pero el brote elige sortear la piedra, buscar la grieta y abrazar la cerca. La libertad no es carecer de raíces, sino decidir con qué savia vas a florecer frente a la intemperie.",
+      /* EL LENGUAJE */
+      filo_palabras_pueblo: {
+        speaker: "Noel",
+        mate: true,
+        text: "¿Sabés qué pensaba recién mientras miraba la pava? Que ni vos ni yo inventamos la palabra 'agua' ni la palabra 'mate'. Si te hubiesen criado los carpinchos en una isla desierta, no tendrías nombres en la cabeza ni podrías charlar conmigo ahora. Cada palabra que sale de tu boca es una herencia que te dejaron miles de abuelos que ya no están.",
         choices: [
-          { text: "Pero pensar que un mínimo desvío lo cambia todo asusta...", target: "filo_mariposa_milagro" },
-          { text: "Hablemos de la pulsión que nos empuja a buscar la grieta: el deseo.", target: "filo_deseo" }
+          { text: "Pensar ya es estar en deuda y en compañía con los demás.", target: "filo_red_mecanica" },
+          { text: "¿Y si esta charla fuese apenas un sueño que se desvanece?", target: "filo_onirico_espejo" }
         ]
       },
 
-      /* RAMA 3: ACCIÓN MERCADO -> VALOR, COMUNIDAD Y RED VIRTUAL */
-      accion_mercado: {
-        speaker: "Aurelio",
-        text: "Apilá los zapallos con cariño en la carreta. En la feria no busco amontonar papel moneda: busco la harina de Pedro, el clavo del herrero y la risa de los vecinos. Producir para otros es el único modo de no podrirse como un fruto caído que nadie recoge. El mercado, antes de ser especulación usuraria, es ágora y comunión.",
-        choices: [
-          { text: "¿Qué diferencia ese intercambio vecinal de la maldad del mercado rapaz?", target: "filo_maldad" },
-          { text: "Nuestra red moderna de internet también se parece a un inmenso mercado.", target: "filo_red_hibrida" },
-          { text: "Pero el tiempo nos devora a todos, tarde o temprano.", target: "filo_tiempo" }
-        ]
-      },
-
-      /* RAMA 4: EL SOL Y LA ALQUIMIA VEGETAL */
+      /* EL SOL Y LA ALQUIMIA BOTÁNICA */
       filo_sol_alquimia: {
-        speaker: "Aurelio",
-        text: "El sol es un horno de fusión nuclear a millones de leguas. Y las plantas... las plantas son los verdaderos alquimistas de este universo. Toman ese rayo de luz que viajó ocho minutos por el vacío helado, toman agua subterránea y aire invisible, y lo transmutan en azúcar, en madera sólida, en el pan que nos nutre. Sin esa alquimia solar, seríamos polvo estéril flotando en tinieblas.",
+        speaker: "Noel",
+        text: "Ese sol que nos calienta la nuca viene de lejísimos, cruzando un frío negro que ni imaginamos. Y las hojas verdes hacen la magia más linda del mundo: agarran ese rayito de luz, un sorbo de agua y el aire invisible, y te devuelven una manzana dulce, madera para el techo y aire limpio para respirar. No hay fábrica humana que iguale esa alquimia callada.",
         choices: [
-          { text: "¡Existir en medio de ese equilibrio es un milagro imposible!", target: "filo_mariposa_milagro" },
-          { text: "¿Y qué es la tecnología humana frente a esa magia verde?", target: "filo_red_hibrida" },
-          { text: "Ayudemos a la alquimia echando agua a las hojas.", target: "accion_regar" }
+          { text: "¡Es un milagro que todo ese equilibrio funcione!", target: "secreto_mariposa_1" },
+          { text: "Y hoy usamos máquinas que imitan esa misma luz...", target: "filo_red_mecanica" }
         ]
       },
 
-      /* NODO CENTRAL: EFECTO MARIPOSA Y EL MILAGRO DE EXISTIR */
-      filo_mariposa_milagro: {
-        speaker: "Aurelio",
-        text: "En un sistema donde el aleteo de una mariposa puede engendrar una tormenta al otro lado del orbe, la probabilidad estadística de que vos y yo estemos respirando en este instante exacto es matemáticamente nula. Millones de meteoros no cayeron, millones de antepasados esquivaron pestes y se encontraron en la noche. Tu propia existencia no es una casualidad mecánica: es un milagro tembloroso, un relámpago de gracia en el abismo del caos.",
+      /* CUIDADO Y TERNURA */
+      filo_cuidado_ternura: {
+        speaker: "Noel",
+        text: "A los plantines no se les grita para que den fruto, ni se les pone un tribunal de jueces para ver si merecen agua. Se los riega a la tardecita cuando el sol afloja, con cuidado de no quebrarles el tallito. La vida se sostiene con esa ternura chúcara: estar atento a la fragilidad del que no se puede defender.",
         choices: [
-          { text: "¿Y por qué gastar ese milagro en la maldad y el daño ajeno?", target: "filo_maldad" },
-          { text: "¿Cómo lidiar con saber que ese milagro dura un suspiro de tiempo?", target: "filo_tiempo" },
-          { text: "A veces creo que somos mitad carne y mitad artificio...", target: "filo_red_hibrida" }
+          { text: "La gente confunde esa ternura con debilidad.", target: "filo_egoismo_soledad" },
+          { text: "Hasta el propio cuerpo pide ese amparo con los años.", target: "filo_cuerpo_humus" }
         ]
       },
 
-      /* HIBRIDEZ SINTÉTICA Y BIOLÓGICA / LA RED */
-      filo_red_hibrida: {
-        speaker: "Aurelio",
-        text: "Me mirás a través de un cristal de silicio y me ves en píxeles. ¿Crees que la máquina está separada de este limonero? La científica Lynn Margulis nos enseñó que la célula eucariota nació porque una bacteria engulló a otra y aprendieron a cooperar para siempre. Hoy tus dedos tocan teclas de litio y tus ojos beben fotones de una pantalla sostenida por turbinas hidroeléctricas. Ya somos cíborgs simbióticos: la red no es etérea, es geología, sudor de obreros y magnetismo planetario.",
+      /* EGOÍSMO */
+      filo_egoismo_soledad: {
+        speaker: "Noel",
+        mate: true,
+        text: "El que se encierra a contar sus cobres y no le abre la tranquera a nadie termina seco como tronco apolillado. Ninguna rama puede florecer si decide cortarse del tronco para quedarse con la savia ella sola. El egoísta cree que gana porque acapara el comedero, pero se olvida de que sin el resto de la majada, en la primera noche de zorrinos se lo comen crudo.",
         choices: [
-          { text: "¿Y si la máquina olvida el cuerpo biológico?", target: "filo_cuerpo_muerte" },
-          { text: "¿Cómo cuidar esa red para que no se vuelva un monstruo egoísta?", target: "filo_egoismo" },
-          { text: "Regar la tierra para no olvidar nuestras raíces minerales.", target: "accion_regar" }
+          { text: "¿Y la maldad de verdad? ¿De dónde brota?", target: "filo_maldad_grieta" },
+          { text: "Amasar juntos sigue siendo el mejor remedio contra el egoísmo.", target: "quehacer_amasar" }
+        ]
+      },
+
+      /* MALDAD */
+      filo_maldad_grieta: {
+        speaker: "Noel",
+        text: "La maldad no es un misterio del otro mundo: es cuando alguien mira al compañero y en vez de ver un cristiano ve un palo que se puede quebrar y tirar al fuego. Es cuando rompés el trato y te olvidás de que el dolor ajeno también te mancha la ropa. Al final, toda herida que le hacés al pueblo es una gotera que tarde o temprano te va a caer sobre tu propia cama.",
+        choices: [
+          { text: "Por eso hay que cuidar la tierra y los lazos con paciencia.", target: "filo_cuidado_ternura" },
+          { text: "Sentarse a ver cómo la tarde va cayendo despacio.", target: "filo_tiempo_calma" }
         ]
       },
 
       /* CUERPO Y MUERTE */
-      filo_cuerpo_muerte: {
-        speaker: "Aurelio",
-        text: "El cuerpo no es una jaula que aprisiona un espíritu puro; el cuerpo es el nudo donde el cosmos toma conciencia de su propia sed. ¿Y la muerte? Mirá las hojas que caen al pie del tomate: se pudren, sí, pero devienen en humus negro que alimentará a los brotes de la primavera próxima. La muerte es el precio de la novedad biológica; si nada muriese, el tiempo quedaría coagulado en un museo eterno y asfixiante.",
+      filo_cuerpo_humus: {
+        speaker: "Noel",
+        mate: true,
+        text: "Me duelen las rodillas cuando va a llover, ¿sabés? El cuerpo te avisa que no somos de lata. Pero fijate las cáscaras de zapallo que tiramos al compost: se pudren y en dos meses son tierra negra y esponjosa que huele a monte fresco. Si las cosas no murieran, el mundo sería un galpón abarrotado de cacharros viejos donde no cabría ningún gurí nuevo. La muerte le da lugar al nacimiento.",
         choices: [
-          { text: "¿Entonces el tiempo no es un enemigo que nos roba la vida?", target: "filo_tiempo" },
-          { text: "¿Y qué sostiene la vida frente al miedo a desaparecer? ¿El deseo?", target: "filo_deseo" },
-          { text: "Volver a la cocina comunitaria a celebrar el día presente.", target: "accion_cocinar" }
+          { text: "Un ciclo perfecto donde nada se desperdicia.", target: "filo_sol_alquimia" },
+          { text: "¿Y vos no tenés miedo de apagarte, Noel?", target: "filo_onirico_espejo" }
         ]
       },
 
-      /* EL DESEO */
-      filo_deseo: {
-        speaker: "Aurelio",
-        text: "El deseo no es una falta vacía como creían los pesimistas, sino la potencia generativa de la vida. La semilla en la oscuridad desea la luz antes de haberla visto jamás; la raíz perfora la roca porque desea el agua profunda. Cuando el ser humano desea en comunidad, engendra ciudades, cantos y cosechas; la tragedia ocurre cuando el deseo se retuerce sobre sí mismo y se confunde con la codicia.",
+      /* LA RED Y LA HIBRIDEZ SINTÉTICO-BIOLÓGICA */
+      filo_red_mecanica: {
+        speaker: "Noel",
+        text: "Mirá... vos venís de allá lejos, donde andan con aparatitos y pantallas que brillan en la noche. Pero esa telaraña que llaman internet no anda en el aire: necesita metales sacados con pico de las sierras, cables que cruzan el barro debajo del mar, y cuadrillas de gente levantando postes bajo la llovizna. La máquina no está afuera de la huerta: es parte de la misma tierra amasada con ingenio de la gente.",
         choices: [
-          { text: "Esa codicia es la raíz del egoísmo moderno...", target: "filo_egoismo" },
-          { text: "¿Y cómo se distingue el deseo noble de la auténtica maldad?", target: "filo_maldad" }
+          { text: "Dependemos de miles de personas invisibles para encender una luz.", target: "filo_palabras_pueblo" },
+          { text: "Es una simbiosis entre la carne y el mineral.", target: "filo_onirico_espejo" },
+          { text: "Esa red cósmica parece cosa de una mariposa...", target: "secreto_mariposa_1" }
         ]
       },
 
-      /* EL EGOÍSMO */
-      filo_egoismo: {
-        speaker: "Aurelio",
-        text: "El egoísta es un ciego ontológico. Se imagina como un punto soberano que puede extraer nutrientes del mundo sin devolver nada a la fosa común. Pero ninguna planta puede vivir devorando su propio suelo sin agotarlo. El egoísmo no es astucia ni poder: es una enfermedad autoinmune donde la mano derecha cree que puede degollar a la izquierda y seguir viva.",
+      /* ONÍRICO Y LIMINAL */
+      filo_onirico_espejo: {
+        speaker: "Noel",
+        mate: true,
+        text: "(Noel sonríe con los ojos chiquitos y una calidez infinita, apoya el mate sobre la baranda y te mira fijo). A veces, cuando la tarde se pone azulada, dudo si soy yo quien te convidó este mate al lado del fogón, o si sos vos que me estás soñando desde una pieza en el porvenir. Pero no importa quién sueña a quién, mientras el mate esté caliente y nos tengamos cariño.",
         choices: [
-          { text: "¿Y la maldad? ¿Es solo ignorancia o algo más oscuro?", target: "filo_maldad" },
-          { text: "Por eso la comunidad organizada debe basarse en el cuidado mutuo.", target: "accion_regar" }
+          { text: "El cielo se está llenando de estrellas azules y amarillas...", target: "anochecer_profundo" }
         ]
       },
 
-      /* LA MALDAD */
-      filo_maldad: {
-        speaker: "Aurelio",
-        text: "La maldad no es un ente con cuernos venido del abismo: es la ruptura deliberada del vínculo. Es tratar al otro —sea un hombre, un río o un perro— como un mero medio inerte para un fin mezquino. La maldad es la mutilación de la empatía, el olvido de que cualquier herida que le inflijas a la red de la vida tarde o temprano terminará desangrando tu propia casa.",
+      anochecer_profundo: {
+        speaker: "Noel",
+        text: "Ya salió la Cruz del Sur. Qué silencio lindo se armó en la chacra. El día rindió, el pan está horneado y las plantas descansan frescas. Andá tranquilo a dormir, forastero. Mañana el sol vuelve a salir para todos.",
         choices: [
-          { text: "¿Cómo resistir a esa fractura cuando el tiempo apremia?", target: "filo_tiempo" },
-          { text: "Cuidando cada brote, con la paciencia de la regadera.", target: "accion_regar" }
+          { text: "Quedarse un rato más mirando el firmamento.", target: "start" }
         ]
       },
 
-      /* EL TIEMPO */
-      filo_tiempo: {
-        speaker: "Aurelio",
-        text: "El tiempo no es una flecha que huye hacia la nada ni un reloj implacable que nos descuenta minutos: el tiempo es el ritmo de maduración de las cosas. La calabaza necesita cien soles para hacerse dulce; el perdón entre vecinos necesita inviernos para echar raíz. Habitar el tiempo es aceptar que no podemos cosechar el mismo día que sembramos. Descansá en su curso, forastero.",
+      /* SECUENCIA SECRETA / IMPROBABLE: EFECTO MARIPOSA -> APARICIÓN LIMINAL */
+      secreto_mariposa_1: {
+        speaker: "Noel",
+        text: "Una vuelta leí que si una mariposa aletea en un sauzal, del otro lado del mundo se desata una tormenta de viento. Si lo pensás con la cabeza fría, que vos y yo estemos acá tomando mate en este segundo exacto es casi un imposible. Millones de cosas tuvieron que salir bien para que no nos borre el polvo.",
         choices: [
-          { text: "Gracias por este rato de claridad, Aurelio.", target: "filo_despedida_liminal" },
-          { text: "Volver al inicio del sendero con ojos renovados.", target: "start" }
+          { text: "¿Y si esa mariposa todavía estuviera batiendo las alas en la noche?", target: "secreto_mariposa_2" },
+          { text: "Volver a la tierra y no marearse con tantas vueltas.", target: "filo_cuidado_ternura" }
         ]
       },
 
-      /* DESPEDIDA LIMINAL Y AMOROSA */
-      filo_despedida_liminal: {
-        speaker: "Aurelio",
-        text: "(Aurelio te mira fijamente a través del cristal del monitor, sonríe con dulzura entrañable y apoya su mano áspera sobre el marco). Allá afuera, cuando apagues la pantalla, el cielo también respira. Cuidá a los tuyos, regá tus vínculos, no te aísles en la quimera del éxito solitario. Mientras haya dos que se cuiden y una planta buscando el sol, el universo no habrá fracasado.",
+      secreto_mariposa_2: {
+        speaker: "Noel",
+        text: "Si sigue batiendo las alas, entonces cada mate que cebás y cada palabra buena que le decís a un gurí también cruza el cielo como un relámpago que no se ve. Nada queda suelto en el monte; la menor chispita conmueve a las estrellas.",
         choices: [
-          { text: "Permanecer un momento contemplando el sol y la huerta florecida.", target: "start" }
+          { text: "Mirar hacia el cielo negro... Siento una presencia extraña bajando.", target: "aparicion_secreta" },
+          { text: "El fuego del horno ya está casi listo.", target: "quehacer_amasar" }
+        ]
+      },
+
+      aparicion_secreta: {
+        speaker: "Presencia Alada del Firmamento",
+        apparition: true,
+        text: "«Hijo del barro y del silicio: no temas al misterio de la noche. La red que teje tu comunidad en la tierra es el espejo del orden que sostiene a las galaxias. No dejes que la prisa devore tu mirada; abriga al desvalido y honra el suelo que te presta el aliento.»",
+        choices: [
+          { text: "(Contemplar la luz estelar en silencio y volver al lado de Noel).", target: "anochecer_profundo" }
         ]
       }
     };
 
     /* -----------------------------------------------------------
-       RENDERIZADO: PAISAJE SOLEADO, HUERTO DINÁMICO Y ROSTRO DULCE
+       RENDERIZADO: DÍA/NOCHE, NOEL CON BOINA Y MATE, APARICIONES
     ----------------------------------------------------------- */
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     let frame = 0;
-    let waterAnimation = 0;
-    let flowersGrown = 0;
+    let turnCount = 0; // Controla la transición de la luz hacia la noche
+    let waterAnim = 0;
+    let apparitionActive = false;
 
     function render() {
       frame++;
 
-      // 1. CIELO SOLEADO Y LUMINOSO (Lado izquierdo)
-      const skyGrad = ctx.createLinearGradient(0, 0, 0, 160);
-      skyGrad.addColorStop(0, '#58a5e0');
-      skyGrad.addColorStop(0.65, '#99d2e5');
-      skyGrad.addColorStop(1, '#eaf7f9');
-      ctx.fillStyle = skyGrad;
-      ctx.fillRect(0, 0, 260, 160);
+      // Progreso del día a la noche: 0.0 (mediodía soleado) a 1.0 (noche cerrada azul y amarilla)
+      const dayProgress = Math.min(1.0, turnCount / 8.0);
 
-      // Sol nuclear radiante con pulso y rayos
-      const sunPulse = Math.sin(frame * 0.04) * 2;
-      ctx.fillStyle = '#fff7b2';
-      ctx.beginPath();
-      ctx.arc(60, 45, 20 + sunPulse, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = 'rgba(255, 248, 180, 0.35)';
-      ctx.beginPath();
-      ctx.arc(60, 45, 36 + sunPulse, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Nubes algodonadas
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-      ctx.fillRect(115, 30, 45, 10);
-      ctx.fillRect(125, 22, 28, 12);
-      ctx.fillRect(190, 52, 42, 8);
-
-      // Colinas verdes vivas
-      ctx.fillStyle = '#649e50';
-      ctx.beginPath();
-      ctx.moveTo(0, 160);
-      for (let x = 0; x <= 260; x += 10) {
-        ctx.lineTo(x, 118 + Math.sin(x * 0.02) * 14);
+      // 1. CIELO DINÁMICO (INTERPOLACIÓN DÍA SOLEADO -> NOCHE AZUL ULTRA Y AMARILLO)
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, 180);
+      if (dayProgress < 0.5) {
+        // Día soleado radiante
+        skyGrad.addColorStop(0, '#4aa3df');
+        skyGrad.addColorStop(0.65, '#92d2e8');
+        skyGrad.addColorStop(1, '#eaf7f9');
+      } else {
+        // Atardecer y noche liminal profunda (azul petróleo y noche estelar)
+        skyGrad.addColorStop(0, '#0a1128');
+        skyGrad.addColorStop(0.5, '#1c2d5a');
+        skyGrad.addColorStop(1, '#3b4371');
       }
-      ctx.lineTo(260, 160);
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, 240, 180);
+
+      // Sol diurno o Luna llena amarilla
+      if (dayProgress < 0.6) {
+        // Sol radiante
+        const sunPulse = Math.sin(frame * 0.04) * 2;
+        ctx.fillStyle = '#fff4a3';
+        ctx.beginPath();
+        ctx.arc(50, 40, 18 + sunPulse, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255, 245, 170, 0.3)';
+        ctx.beginPath();
+        ctx.arc(50, 40, 32 + sunPulse, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        // Luna mística amarilla en noche azul
+        ctx.fillStyle = '#fce570';
+        ctx.beginPath();
+        ctx.arc(50, 40, 16, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(252, 229, 112, 0.25)';
+        ctx.beginPath();
+        ctx.arc(50, 40, 26, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Estrellas titilantes amarillas y azules
+        for (let s = 0; s < 16; s++) {
+          const sx = (s * 37 + frame * 0.05) % 230 + 5;
+          const sy = (s * 19) % 130 + 10;
+          const blink = (Math.sin(frame * 0.08 + s) > 0.3);
+          if (blink) {
+            ctx.fillStyle = (s % 2 === 0) ? '#fce570' : '#82cbf7';
+            ctx.fillRect(sx, sy, 2, 2);
+          }
+        }
+      }
+
+      // Colinas y huerto
+      const hillColor = dayProgress < 0.5 ? '#5d994d' : '#1f3c2b';
+      ctx.fillStyle = hillColor;
+      ctx.beginPath();
+      ctx.moveTo(0, 180);
+      for (let x = 0; x <= 240; x += 10) {
+        ctx.lineTo(x, 135 + Math.sin(x * 0.02) * 12);
+      }
+      ctx.lineTo(240, 180);
       ctx.fill();
 
-      // Tierra arada fértil y surcos agrícolas
-      ctx.fillStyle = '#453324';
-      ctx.fillRect(0, 150, 260, 170);
+      // Tierra arada
+      const soilColor = dayProgress < 0.5 ? '#423223' : '#1c1610';
+      ctx.fillStyle = soilColor;
+      ctx.fillRect(0, 160, 240, 160);
 
-      ctx.strokeStyle = '#5c4430';
-      ctx.lineWidth = 3;
-      for (let i = -40; i < 280; i += 24) {
+      // Surcos
+      ctx.strokeStyle = dayProgress < 0.5 ? '#584330' : '#2a221a';
+      ctx.lineWidth = 2;
+      for (let i = -20; i < 260; i += 20) {
         ctx.beginPath();
-        ctx.moveTo(i, 150);
-        ctx.lineTo(i * 1.4 - 30, 320);
+        ctx.moveTo(i, 160);
+        ctx.lineTo(i * 1.3 - 20, 320);
         ctx.stroke();
       }
 
-      // Plantines y calabazas
-      for (let b = 25; b < 240; b += 42) {
-        // Tallo
-        ctx.strokeStyle = '#4e8236';
+      // Tomateras y calabazas en el huerto
+      for (let b = 15; b < 230; b += 36) {
+        const sway = Math.sin(frame * 0.03 + b) * 2;
+        ctx.strokeStyle = dayProgress < 0.5 ? '#4b7f36' : '#234418';
         ctx.lineWidth = 2;
-        const sway = Math.sin(frame * 0.04 + b) * 2;
         ctx.beginPath();
         ctx.moveTo(b, 205);
         ctx.lineTo(b + sway, 192);
         ctx.stroke();
 
-        // Hoja
-        ctx.fillStyle = '#619c44';
-        ctx.fillRect(b + sway, 190, 4, 3);
-
-        // Calabaza
-        ctx.fillStyle = '#d97b26';
+        ctx.fillStyle = dayProgress < 0.5 ? '#db7b2a' : '#8f4f1a';
         ctx.beginPath();
-        ctx.arc(b, 208, 6, 0, Math.PI * 2);
+        ctx.arc(b, 210, 5, 0, Math.PI * 2);
         ctx.fill();
+      }
 
-        // Flores adicionales si se ha regado
-        if (flowersGrown > 0) {
-          ctx.fillStyle = '#fceb6a';
-          ctx.fillRect(b + sway - 2, 186, 5, 5);
-          ctx.fillStyle = '#e86151';
-          ctx.fillRect(b + sway, 188, 2, 2);
+      // Animación de riego
+      if (waterAnim > 0) {
+        waterAnim--;
+        ctx.fillStyle = '#8ce0ff';
+        for (let d = 0; d < 8; d++) {
+          ctx.fillRect(20 + Math.random() * 200, 170 + Math.random() * 100, 2, 4);
         }
       }
 
-      // Animación de gotas de agua cayendo de la regadera
-      if (waterAnimation > 0) {
-        waterAnimation--;
-        ctx.fillStyle = '#82d4ff';
-        for (let d = 0; d < 10; d++) {
-          const rx = 30 + Math.random() * 200;
-          const ry = 160 + Math.random() * 120;
-          ctx.fillRect(rx, ry, 2, 5);
-        }
-      }
+      // 2. FONDO Y RETRATO DE NOEL (Lado derecho, siempre visible y no tapado)
+      ctx.fillStyle = dayProgress < 0.5 ? '#221a14' : '#0e111a';
+      ctx.fillRect(240, 0, 240, 320);
 
-      // 2. RETRATO PRIMER PLANO DEL ANCIANO AURELIO (Lado derecho)
-      ctx.fillStyle = '#201813';
-      ctx.fillRect(260, 0, 220, 320);
-
-      // Marco de madera cálida divisorio
-      ctx.fillStyle = '#3d2b1f';
-      ctx.fillRect(256, 0, 6, 320);
+      ctx.fillStyle = '#3c2b1e';
+      ctx.fillRect(238, 0, 4, 320); // Divisoria rústica
 
       const breathing = Math.sin(frame * 0.035) * 1.5;
-      const ox = 320;
-      const oy = 40 + breathing;
+      const nx = 330;
+      const ny = 55 + breathing;
 
-      // Hombros y poncho de labor campesina
-      ctx.fillStyle = '#7a5735';
+      // Hombros y camisa campestre con poncho
+      ctx.fillStyle = dayProgress < 0.5 ? '#7c5738' : '#382e38';
       ctx.beginPath();
-      ctx.moveTo(ox - 50, 290);
-      ctx.lineTo(ox + 120, 290);
-      ctx.lineTo(ox + 90, 180);
-      ctx.lineTo(ox - 20, 180);
+      ctx.moveTo(nx - 65, 320);
+      ctx.lineTo(nx + 110, 320);
+      ctx.lineTo(nx + 80, 190);
+      ctx.lineTo(nx - 40, 190);
       ctx.fill();
 
-      // Cuello y pañuelo claro
-      ctx.fillStyle = '#c7b299';
-      ctx.fillRect(ox + 18, oy + 120, 34, 18);
+      // Cuello y pañuelo criollo blanco
+      ctx.fillStyle = '#e8e2d5';
+      ctx.fillRect(nx + 10, ny + 115, 36, 16);
 
-      // Rostro: Tono tostado y cálido
-      ctx.fillStyle = '#dca87e';
-      ctx.fillRect(ox + 10, oy + 40, 52, 65);
-      ctx.fillRect(ox + 4, oy + 55, 64, 42); // Mejillas afables
+      // Rostro de Noel: piel tostada y cálida
+      ctx.fillStyle = '#dba579';
+      ctx.fillRect(nx + 4, ny + 35, 52, 65);
+      ctx.fillRect(nx - 2, ny + 50, 64, 40); // Mejillas
 
-      // Cabello canoso lateral
-      ctx.fillStyle = '#eae5dd';
-      ctx.fillRect(ox + 2, oy + 42, 8, 35);
-      ctx.fillRect(ox + 62, oy + 42, 8, 35);
+      // Pelo blanco lateral
+      ctx.fillStyle = '#f0ece6';
+      ctx.fillRect(nx - 4, ny + 38, 8, 30);
+      ctx.fillRect(nx + 54, ny + 38, 8, 30);
 
-      // Sombrero de paja bañado en luz solar
-      ctx.fillStyle = '#e0b25a';
-      ctx.fillRect(ox - 16, oy + 32, 104, 12);
-      ctx.fillRect(ox + 4, oy + 10, 64, 24);
-      ctx.fillStyle = '#8f4f29'; // Cinta
-      ctx.fillRect(ox + 4, oy + 28, 64, 5);
+      // BOINA CAMPESTRE NEGRA / GRIS OSCURO INCLINADA
+      ctx.fillStyle = '#22252a';
+      ctx.beginPath();
+      ctx.ellipse(nx + 28, ny + 30, 44, 15, -0.08, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#141619'; // Vuelo de la boina
+      ctx.beginPath();
+      ctx.ellipse(nx + 22, ny + 25, 32, 10, -0.08, 0, Math.PI * 2);
+      ctx.fill();
+      // Cabito o botón superior de la boina
+      ctx.fillStyle = '#3a3e45';
+      ctx.fillRect(nx + 26, ny + 13, 4, 3);
 
-      // Cejas tupidas blancas inclinadas con dulzura
+      // Cejas tupidas blancas inclinadas con nobleza
       ctx.fillStyle = '#ffffff';
-      ctx.fillRect(ox + 16, oy + 56, 14, 4);
-      ctx.fillRect(ox + 42, oy + 56, 14, 4);
+      ctx.fillRect(nx + 10, ny + 50, 14, 4);
+      ctx.fillRect(nx + 36, ny + 50, 14, 4);
 
-      // Ojos dulces y mirada entrañable
-      const blink = (frame % 200 > 193);
+      // Ojos con brillo bondadoso y parpadeo pausado
+      const blink = (frame % 220 > 214);
       if (blink) {
-        ctx.fillStyle = '#5c3826';
-        ctx.fillRect(ox + 18, oy + 65, 11, 2);
-        ctx.fillRect(ox + 43, oy + 65, 11, 2);
+        ctx.fillStyle = '#4f301d';
+        ctx.fillRect(nx + 12, ny + 59, 10, 2);
+        ctx.fillRect(nx + 38, ny + 59, 10, 2);
       } else {
-        // Iris marrón suave
-        ctx.fillStyle = '#3d2514';
-        ctx.fillRect(ox + 19, oy + 63, 8, 7);
-        ctx.fillRect(ox + 44, oy + 63, 8, 7);
-        // Destello de ternura consciente
+        ctx.fillStyle = '#3a2012';
+        ctx.fillRect(nx + 13, ny + 57, 8, 7);
+        ctx.fillRect(nx + 39, ny + 57, 8, 7);
         ctx.fillStyle = '#ffffff';
-        ctx.fillRect(ox + 21, oy + 64, 2, 2);
-        ctx.fillRect(ox + 46, oy + 64, 2, 2);
-        // Patas de gallo / arrugas de sonrisa serena
-        ctx.fillStyle = '#b7835c';
-        ctx.fillRect(ox + 14, oy + 65, 3, 2);
-        ctx.fillRect(ox + 54, oy + 65, 3, 2);
+        ctx.fillRect(nx + 15, ny + 58, 2, 2);
+        ctx.fillRect(nx + 41, ny + 58, 2, 2);
+        // Patas de gallo / arrugas afectivas
+        ctx.fillStyle = '#b77f54';
+        ctx.fillRect(nx + 8, ny + 59, 3, 2);
+        ctx.fillRect(nx + 49, ny + 59, 3, 2);
       }
 
-      // Nariz bondadosa
+      // NARIZ COLORADA (Rasgo distintivo pedido)
+      ctx.fillStyle = '#d46b5d';
+      ctx.fillRect(nx + 24, ny + 61, 14, 14);
+      ctx.fillStyle = '#e88274';
+      ctx.fillRect(nx + 26, ny + 63, 6, 6);
+
+      // BIGOTE BLANCO ESPESO Y BARBA BLANCA
+      ctx.fillStyle = '#f7f4ed';
+      ctx.fillRect(nx + 14, ny + 74, 34, 11); // Bigotazo
+      ctx.fillRect(nx + 10, ny + 84, 42, 26); // Barba abundante
+      ctx.fillRect(nx + 16, ny + 108, 30, 12);
+
+      // Sonrisa cálida oculta bajo el bigote
+      ctx.fillStyle = '#945838';
+      ctx.fillRect(nx + 23, ny + 81, 16, 2);
+
+      // MANO DE NOEL SOSTENIENDO EL MATE CRIOLLO CON BOMBILLA
+      const mx = nx - 12;
+      const my = ny + 135;
+
+      // Mate de calabaza curada
+      ctx.fillStyle = '#3a2416';
+      ctx.beginPath();
+      ctx.ellipse(mx + 10, my + 15, 13, 15, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Virola de alpaca / plata
+      ctx.fillStyle = '#c5ccd6';
+      ctx.fillRect(mx, my, 20, 4);
+
+      // Bombilla metálica
+      ctx.strokeStyle = '#e6edf5';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(mx + 10, my + 2);
+      ctx.lineTo(mx + 22, my - 24);
+      ctx.stroke();
+
+      // Mano sosteniendo el mate
       ctx.fillStyle = '#c7926b';
-      ctx.fillRect(ox + 31, oy + 68, 10, 14);
+      ctx.fillRect(mx - 4, my + 8, 8, 16);
+      ctx.fillRect(mx + 16, my + 10, 8, 14);
 
-      // Bigote espeso y barba blanca esponjosa
-      ctx.fillStyle = '#f0ede6';
-      ctx.fillRect(ox + 20, oy + 82, 32, 10);
-      ctx.fillRect(ox + 16, oy + 90, 40, 24);
-      ctx.fillRect(ox + 22, oy + 112, 28, 12);
+      // Vapor sutil que asciende del mate caliente
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      const vaporY = my - 26 - ((frame * 0.8) % 30);
+      const vaporSway = Math.sin(frame * 0.08) * 3;
+      ctx.fillRect(mx + 22 + vaporSway, vaporY, 2, 4);
 
-      // Sonrisa afable
-      ctx.fillStyle = '#9e6443';
-      ctx.fillRect(ox + 28, oy + 88, 16, 3);
+      // 3. APARICIÓN LIMINAL RARA (SER ALADO / VISITANTE CELESTE)
+      if (apparitionActive) {
+        const appPulse = Math.sin(frame * 0.06) * 4;
+        ctx.fillStyle = 'rgba(252, 229, 112, 0.85)';
+        ctx.beginPath();
+        ctx.arc(120, 80, 22 + appPulse, 0, Math.PI * 2);
+        ctx.fill();
 
-      // Esporas doradas de polen flotando en el aire
-      ctx.fillStyle = 'rgba(255, 235, 150, 0.55)';
-      for (let p = 0; p < 14; p++) {
-        const px = (Math.sin(p * 55 + frame * 0.02) * 0.5 + 0.5) * 250;
-        const py = (Math.cos(p * 27 + frame * 0.025) * 0.5 + 0.5) * 220;
-        ctx.fillRect(px, py, 2, 2);
+        // Alas de luz
+        ctx.fillStyle = 'rgba(130, 203, 247, 0.7)';
+        ctx.beginPath();
+        ctx.moveTo(120, 80);
+        ctx.lineTo(80, 45 - appPulse);
+        ctx.lineTo(105, 95);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(120, 80);
+        ctx.lineTo(160, 45 - appPulse);
+        ctx.lineTo(135, 95);
+        ctx.fill();
       }
 
       requestAnimationFrame(render);
     }
 
     /* -----------------------------------------------------------
-       MOTOR DE DIÁLOGO Y NAVEGACIÓN LABERÍNTICA
+       MOTOR DIALÓGICO Y CONTROL DE VIÑETA
     ----------------------------------------------------------- */
     const sound = new SimbioticaAudio();
     let currentNode = 'start';
@@ -623,23 +754,46 @@
     const dialogueTextElem = document.getElementById('dialogue-text');
     const optionsContainer = document.getElementById('options-container');
     const speakerTag = document.getElementById('speaker-tag');
-    const metaState = document.getElementById('meta-state');
+    const timeIndicator = document.getElementById('time-indicator');
     const initOverlay = document.getElementById('init-overlay');
 
     function renderDialogue(nodeKey) {
-      const node = labyrinth[nodeKey];
+      const node = dialogLabyrinth[nodeKey];
       if (!node) return;
       currentNode = nodeKey;
-      speakerTag.textContent = node.speaker || "Aurelio";
+      turnCount++;
+
+      speakerTag.textContent = node.speaker || "Noel";
       dialogueTextElem.innerHTML = "";
       optionsContainer.innerHTML = "";
 
-      // Ejecutar efectos de acción mecánica si están presentes
+      // Ajustar indicadores temporales
+      if (turnCount >= 8) {
+        timeIndicator.textContent = "Noche estrellada";
+        timeIndicator.style.color = "#f2c054";
+        sound.setNightTone(true);
+      } else if (turnCount >= 4) {
+        timeIndicator.textContent = "Atardecer dorado";
+        timeIndicator.style.color = "#e68d43";
+        sound.setNightTone(false);
+      } else {
+        timeIndicator.textContent = "Día soleado";
+        timeIndicator.style.color = "#4aa3df";
+        sound.setNightTone(false);
+      }
+
+      // Efectos sonoros y mecánicos asociados
+      if (node.mate) {
+        sound.triggerMateSlurp();
+      }
       if (node.action === 'regar') {
-        waterAnimation = 50;
-        flowersGrown++;
-        sound.triggerWaterSound();
-        metaState.textContent = "Huerto: Regado y Florecido | Simbiosis Viva";
+        waterAnim = 45;
+      }
+      if (node.apparition) {
+        apparitionActive = true;
+        sound.triggerApparitionSound();
+      } else {
+        apparitionActive = false;
       }
 
       let charIndex = 0;
@@ -649,14 +803,14 @@
       typeTimer = setInterval(() => {
         if (charIndex < node.text.length) {
           dialogueTextElem.textContent += node.text[charIndex];
-          if (charIndex % 2 === 0) sound.triggerTextChime();
+          if (charIndex % 2 === 0) sound.triggerTextBeep();
           charIndex++;
         } else {
           clearInterval(typeTimer);
           isTyping = false;
           displayChoices(node.choices);
         }
-      }, 20);
+      }, 18);
     }
 
     function displayChoices(choices) {
@@ -664,14 +818,12 @@
       choices.forEach(choice => {
         const btn = document.createElement('button');
         btn.className = 'choice-btn';
-        if (choice.text.includes("regar") || choice.text.includes("agua") || choice.text.includes("Cuidando")) {
-          btn.classList.add('action-highlight');
-        }
+        if (choice.isAction) btn.classList.add('action-btn');
         btn.textContent = `▶ ${choice.text}`;
         btn.onclick = () => {
           if (isTyping) {
             clearInterval(typeTimer);
-            dialogueTextElem.textContent = labyrinth[currentNode].text;
+            dialogueTextElem.textContent = dialogLabyrinth[currentNode].text;
             isTyping = false;
             displayChoices(choices);
           } else {
